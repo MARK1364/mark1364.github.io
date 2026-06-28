@@ -491,7 +491,7 @@ function draw() {
     leftSide.setAttribute("width", sideWidth * scale);
     leftSide.setAttribute("height", height * scale);
     leftSide.setAttribute("fill", "#2a3a5a");
-    leftSide.setAttribute("stroke", "#667eea");
+    leftSide.setAttribute("stroke", "#000");
     leftSide.setAttribute("stroke-width", "2");
     svg.appendChild(leftSide);
 
@@ -501,7 +501,7 @@ function draw() {
     rightSide.setAttribute("width", sideWidth * scale);
     rightSide.setAttribute("height", height * scale);
     rightSide.setAttribute("fill", "#2a3a5a");
-    rightSide.setAttribute("stroke", "#667eea");
+    rightSide.setAttribute("stroke", "#000");
     rightSide.setAttribute("stroke-width", "2");
     svg.appendChild(rightSide);
 
@@ -511,7 +511,7 @@ function draw() {
     top.setAttribute("width", (bottomWidth - sideThickness * 2) * scale);
     top.setAttribute("height", wThickness * scale);
     top.setAttribute("fill", "#2a3a5a");
-    top.setAttribute("stroke", "#667eea");
+    top.setAttribute("stroke", "#000");
     top.setAttribute("stroke-width", "2");
     svg.appendChild(top);
 
@@ -521,7 +521,7 @@ function draw() {
     bottom.setAttribute("width", (bottomWidth - sideThickness * 2) * scale);
     bottom.setAttribute("height", wThickness * scale);
     bottom.setAttribute("fill", "#2a3a5a");
-    bottom.setAttribute("stroke", "#667eea");
+    bottom.setAttribute("stroke", "#000");
     bottom.setAttribute("stroke-width", "2");
     svg.appendChild(bottom);
 
@@ -533,7 +533,7 @@ function draw() {
         shelf.setAttribute("width", shelfWidth * scale);
         shelf.setAttribute("height", sThickness * scale);
         shelf.setAttribute("fill", "#3a4a6a");
-        shelf.setAttribute("stroke", "#667eea");
+        shelf.setAttribute("stroke", "#000");
         shelf.setAttribute("stroke-width", "1.5");
         svg.appendChild(shelf);
 
@@ -560,10 +560,10 @@ function draw() {
 
     const COLOR_EDIT = '#10b981';
     const COLOR_OPENING = '#8B4513';
-    const dimColor = '#667eea';
-    const dimTextColor = '#667eea';
+    const dimColor = '#000';
+    const dimTextColor = '#000';
     const openingDimColor = COLOR_OPENING;
-    const fontSize = 24;
+    const fontSize = 36;
     const leftLineX = startX - 20;
     const maxSuppDistanceFromBottom = shelves > 0 ? (wThickness + shelves * gap + (shelves - 1) * sThickness - (suppDiameter / 2)) : 0;
 
@@ -672,7 +672,7 @@ function draw() {
         svg.appendChild(dimTextR);
     }
 
-    const totalHeightX = rightLineX + 190;
+    const totalHeightX = rightLineX + 1190;
     const heightTextY = startY + (height * scale) / 2;
     const heightLabelGapHalf = fontSize * 3.05;
     const heightTextX = totalHeightX;
