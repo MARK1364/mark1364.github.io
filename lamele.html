@@ -74,7 +74,7 @@
         .dim-editable.dim-board-dim .dim-hit {
             fill: rgba(16, 185, 129, 0.42);
             stroke: #10b981;
-            stroke-width: 2.5;
+            stroke-width: 4.5;
             opacity: 1;
             animation: lamelPulse 2.5s ease-in-out infinite;
         }
@@ -87,7 +87,7 @@
         .dim-editable.dim-board-dim:hover .dim-hit {
             fill: rgba(16, 185, 129, 0.5);
             stroke: #34d399;
-            stroke-width: 3;
+            stroke-width: 5;
         }
         .dim-editable.dim-board-dim text {
             fill: #ffffff;
@@ -97,7 +97,7 @@
         .dim-editable.dim-green-badge .dim-badge-ring {
             fill: rgba(16, 185, 129, 0.38);
             stroke: #10b981;
-            stroke-width: 3;
+            stroke-width: 5;
             animation: lamelPulse 2.5s ease-in-out infinite;
             pointer-events: all;
             cursor: pointer;
@@ -105,7 +105,7 @@
         .dim-editable.dim-green-badge:hover .dim-badge-ring {
             fill: rgba(16, 185, 129, 0.55);
             stroke: #34d399;
-            stroke-width: 3.5;
+            stroke-width: 6;
             animation-play-state: paused;
         }
         .dim-editable.dim-green-badge .dim-badge-num {
@@ -122,7 +122,7 @@
         .dim-result-badge .dim-badge-ring {
             fill: rgba(255, 252, 248, 0.96);
             stroke: #C9C4BB;
-            stroke-width: 2.5;
+            stroke-width: 4.5;
         }
         .dim-result-badge .dim-badge-num {
             fill: #3D3A36;
@@ -135,8 +135,8 @@
             pointer-events: none;
         }
         @keyframes lamelPulse {
-            0%, 100% { fill: rgba(16, 185, 129, 0.28); stroke-width: 2.5; }
-            50% { fill: rgba(16, 185, 129, 0.52); stroke-width: 3.5; }
+            0%, 100% { fill: rgba(16, 185, 129, 0.28); stroke-width: 4.5; }
+            50% { fill: rgba(16, 185, 129, 0.52); stroke-width: 6; }
         }
         .dim-editable text { pointer-events: none; }
         .dim-static-board-dim text {
@@ -147,7 +147,7 @@
         .dim-static-board-dim .dim-hit-static {
             fill: rgba(16, 185, 129, 0.38);
             stroke: #10b981;
-            stroke-width: 2.5;
+            stroke-width: 4.5;
             pointer-events: none;
         }
         .dim-result-board-dim { pointer-events: none; }
@@ -159,7 +159,7 @@
         .dim-result-board-dim .dim-hit-static {
             fill: rgba(255, 252, 248, 0.96);
             stroke: #C9C4BB;
-            stroke-width: 2.5;
+            stroke-width: 4.5;
             pointer-events: none;
         }
         .dim-editor {
@@ -481,9 +481,9 @@
 
     // Promienie w jednostkach mm SVG (płyta 2500×1500), nie skala z Półek
     const BADGE_MM = {
-        lg: { min: 90, max: 155, ratio: 0.075 },
-        md: { min: 65, max: 115, ratio: 0.055 },
-        sm: { min: 48, max: 85, ratio: 0.04 }
+        lg: { min: 158, max: 271, ratio: 0.131 },
+        md: { min: 114, max: 201, ratio: 0.096 },
+        sm: { min: 84, max: 149, ratio: 0.07 }
     };
 
     function badgeRadius(boardW, boardH, tier, radiusScale = 1) {
@@ -631,8 +631,8 @@
             const text = g.querySelector('text');
             const rect = g.querySelector('.dim-hit, .dim-hit-static');
             if (!text || !rect) return;
-            const padX = parseFloat(g.dataset.hitPadX || '12');
-            const padY = parseFloat(g.dataset.hitPadY || '10');
+            const padX = parseFloat(g.dataset.hitPadX || '21');
+            const padY = parseFloat(g.dataset.hitPadY || '18');
             placeHitRectFromElement(svg, rect, text, padX, padY);
             applyHitRectRound(rect);
         });
@@ -716,8 +716,8 @@
         g.setAttribute('data-field', opts.field);
         g.setAttribute('role', 'button');
         g.setAttribute('tabindex', '0');
-        g.dataset.hitPadX = String(opts.hitPadX ?? 12);
-        g.dataset.hitPadY = String(opts.hitPadY ?? 10);
+        g.dataset.hitPadX = String(opts.hitPadX ?? 21);
+        g.dataset.hitPadY = String(opts.hitPadY ?? 18);
 
         const hit = document.createElementNS(SVG_NS, 'rect');
         hit.setAttribute('class', 'dim-hit');
@@ -726,7 +726,7 @@
         const text = document.createElementNS(SVG_NS, 'text');
         text.setAttribute('x', opts.x);
         text.setAttribute('y', opts.y);
-        text.setAttribute('font-size', opts.fontSize || 40);
+        text.setAttribute('font-size', opts.fontSize || 70);
         text.setAttribute('font-weight', '800');
         text.setAttribute('font-family', 'sans-serif');
         text.setAttribute('text-anchor', opts.anchor || 'middle');
@@ -755,8 +755,8 @@
         const g = document.createElementNS(SVG_NS, 'g');
         g.setAttribute('class', isResult ? 'dim-result-board-dim' : 'dim-static-board-dim');
         if (opts.field) g.setAttribute('data-field', opts.field);
-        g.dataset.hitPadX = String(opts.hitPadX ?? 14);
-        g.dataset.hitPadY = String(opts.hitPadY ?? 10);
+        g.dataset.hitPadX = String(opts.hitPadX ?? 25);
+        g.dataset.hitPadY = String(opts.hitPadY ?? 18);
 
         const hit = document.createElementNS(SVG_NS, 'rect');
         hit.setAttribute('class', 'dim-hit-static');
@@ -765,7 +765,7 @@
         const text = document.createElementNS(SVG_NS, 'text');
         text.setAttribute('x', opts.x);
         text.setAttribute('y', opts.y);
-        text.setAttribute('font-size', opts.fontSize || 40);
+        text.setAttribute('font-size', opts.fontSize || 70);
         text.setAttribute('font-weight', '800');
         text.setAttribute('font-family', 'sans-serif');
         text.setAttribute('text-anchor', opts.anchor || 'middle');
@@ -1194,8 +1194,8 @@
             x: boardW / 2,
             y: boardH / 2 + 160,
             text: 'Tryb: ' + modeLabel,
-            fontSize: 36,
-            hitPadX: 24
+            fontSize: 63,
+            hitPadX: 42
         });
 
         svg.appendChild(frontLayer);

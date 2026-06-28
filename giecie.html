@@ -93,7 +93,7 @@
     .dim-editable-rect .dim-hit {
       fill: rgba(16, 185, 129, 0.38);
       stroke: #10b981;
-      stroke-width: 2.5;
+      stroke-width: 4.5;
       animation: rectPulse 2.5s ease-in-out infinite;
     }
     .dim-editable-rect:hover .dim-hit {
@@ -498,7 +498,7 @@ function calc() {
       var isSelect = opts.isSelect || false;
       var svgElId = opts.svgElId || 'svgBent';
       var options = opts.options || null;
-      var badgeR = opts.badgeR || 22;
+      var badgeR = opts.badgeR || 38;
       var g = document.createElementNS(SVG_NS, 'g');
       g.setAttribute('class', 'dim-editable-r');
       g.setAttribute('role', 'button');
@@ -511,7 +511,7 @@ function calc() {
       g.appendChild(cir);
       var txt = document.createElementNS(SVG_NS, 'text');
       txt.setAttribute('x', cx); txt.setAttribute('y', cy + 1);
-      txt.setAttribute('font-size', '13');
+      txt.setAttribute('font-size', '23');
       txt.setAttribute('font-weight', '800');
       txt.setAttribute('text-anchor', 'middle');
       txt.setAttribute('dominant-baseline', 'middle');
@@ -585,10 +585,10 @@ function calc() {
       var g = document.createElementNS(SVG_NS, 'g');
       var c = document.createElementNS(SVG_NS, 'circle');
       c.setAttribute('cx', cx); c.setAttribute('cy', cy);
-      c.setAttribute('r', 16);
+      c.setAttribute('r', 28);
       c.setAttribute('fill', '#fff');
       c.setAttribute('stroke', '#C4BFB6');
-      c.setAttribute('stroke-width', '2.5');
+      c.setAttribute('stroke-width', '4.5');
       g.appendChild(c);
       var t = document.createElementNS(SVG_NS, 'text');
       t.setAttribute('x', cx); t.setAttribute('y', cy);
@@ -596,14 +596,14 @@ function calc() {
       t.setAttribute('dominant-baseline', 'middle');
       t.setAttribute('font-family', 'sans-serif');
       var n = document.createElementNS(SVG_NS, 'tspan');
-      n.setAttribute('x', cx); n.setAttribute('dy', '-4');
-      n.setAttribute('font-size', '14'); n.setAttribute('font-weight', '700');
+      n.setAttribute('x', cx); n.setAttribute('dy', '-7');
+      n.setAttribute('font-size', '25'); n.setAttribute('font-weight', '700');
       n.setAttribute('fill', '#3D3A36');
       n.textContent = val.toFixed(1);
       t.appendChild(n);
       var u = document.createElementNS(SVG_NS, 'tspan');
-      u.setAttribute('x', cx); u.setAttribute('dy', '11');
-      u.setAttribute('font-size', '10'); u.setAttribute('font-weight', '400');
+      u.setAttribute('x', cx); u.setAttribute('dy', '19');
+      u.setAttribute('font-size', '18'); u.setAttribute('font-weight', '400');
       u.setAttribute('fill', '#6B6660');
       u.textContent = 'mm';
       t.appendChild(u);
@@ -621,13 +621,13 @@ function calc() {
       g.setAttribute('role', 'button'); g.setAttribute('tabindex', '0');
       var hit = document.createElementNS(SVG_NS, 'rect');
       hit.setAttribute('class', 'dim-hit');
-      hit.setAttribute('x', aCx - 50); hit.setAttribute('y', aCy - 14);
-      hit.setAttribute('width', '100'); hit.setAttribute('height', '28');
-      hit.setAttribute('rx', '5'); hit.setAttribute('ry', '5');
+      hit.setAttribute('x', aCx - 87); hit.setAttribute('y', aCy - 24);
+      hit.setAttribute('width', '175'); hit.setAttribute('height', '49');
+      hit.setAttribute('rx', '9'); hit.setAttribute('ry', '9');
       g.appendChild(hit);
       var txt = document.createElementNS(SVG_NS, 'text');
-      txt.setAttribute('x', aCx); txt.setAttribute('y', aCy + 5);
-      txt.setAttribute('font-size', '14'); txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('x', aCx); txt.setAttribute('y', aCy + 9);
+      txt.setAttribute('font-size', '24'); txt.setAttribute('text-anchor', 'middle');
       txt.setAttribute('dominant-baseline', 'middle');
       txt.textContent = 'Frez ' + aVal + '\u00B0';
       g.appendChild(txt);
@@ -685,8 +685,8 @@ function calc() {
       var kx = segStart3 - bridgeBetweenGroovesPX - grooveTopWidthPX / 2; // center of groove 2
 
       var dimY = topY - 45;
-      addWhiteBadge(bx, dimY - 26, spacingInner);
-      addWhiteBadge(kx, dimY - 26, grooveTopWidthMM);
+      addWhiteBadge(bx, dimY - 46, spacingInner);
+      addWhiteBadge(kx, dimY - 46, grooveTopWidthMM);
     })();
 
     // One depth dimension line (h) at last groove on right side, with green circle
@@ -713,7 +713,7 @@ function calc() {
       svg.appendChild(tickB);
       // Green circle for h value
       var hCx = extX + 22, hCy = dimY;
-      svg.appendChild(makeDimBadge(hCx, hCy, 'h', h, 'skin', 1, 40, { svgElId: 'svg', badgeR: 18 }));
+      svg.appendChild(makeDimBadge(hCx, hCy, 'h', h, 'skin', 1, 40, { svgElId: 'svg', badgeR: 32 }));
     }
 
     const rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");

@@ -57,7 +57,7 @@
         .dim-editable.dim-height .dim-hit {
             fill: rgba(16, 185, 129, 0.42);
             stroke: #10b981;
-            stroke-width: 2.5;
+            stroke-width: 4.5;
             opacity: 1;
             animation: shelvesPulse 2.5s ease-in-out infinite;
         }
@@ -65,7 +65,7 @@
             fill: rgba(16, 185, 129, 0.5);
             opacity: 1;
             stroke: #34d399;
-            stroke-width: 3;
+            stroke-width: 5;
         }
         .dim-editable.dim-height text {
             fill: #ffffff;
@@ -75,7 +75,7 @@
         .dim-editable.dim-green-badge .dim-badge-ring {
             fill: rgba(16, 185, 129, 0.38);
             stroke: #10b981;
-            stroke-width: 3;
+            stroke-width: 5;
             animation: shelvesPulse 2.5s ease-in-out infinite;
             pointer-events: all;
             cursor: pointer;
@@ -83,7 +83,7 @@
         .dim-editable.dim-green-badge:hover .dim-badge-ring {
             fill: rgba(16, 185, 129, 0.55);
             stroke: #34d399;
-            stroke-width: 3.5;
+            stroke-width: 6;
             animation-play-state: paused;
         }
         .dim-editable.dim-green-badge .dim-badge-num {
@@ -99,17 +99,17 @@
         @keyframes shelvesPulse {
             0%, 100% {
                 fill: rgba(16, 185, 129, 0.28);
-                stroke-width: 2.5;
+                stroke-width: 4.5;
             }
             50% {
                 fill: rgba(16, 185, 129, 0.52);
-                stroke-width: 3.5;
+                stroke-width: 6;
             }
         }
         .dim-editable .dim-hit {
             fill: rgba(122, 107, 143, 0.14);
             stroke: #9B8BB5;
-            stroke-width: 2;
+            stroke-width: 3.5;
             rx: 5;
             opacity: 0.55;
             animation: dimPulse 2.8s ease-in-out infinite;
@@ -120,18 +120,18 @@
             fill: rgba(122, 107, 143, 0.3);
             opacity: 1;
             stroke: #7A6B8F;
-            stroke-width: 2.5;
+            stroke-width: 4.5;
             animation-play-state: paused;
         }
         @keyframes dimPulse {
             0%, 100% {
                 opacity: 0.35;
-                stroke-width: 1.5;
+                stroke-width: 2.5;
                 fill: rgba(122, 107, 143, 0.1);
             }
             50% {
                 opacity: 0.95;
-                stroke-width: 2.5;
+                stroke-width: 4.5;
                 fill: rgba(122, 107, 143, 0.26);
             }
         }
@@ -336,9 +336,9 @@ function shelvesShortLabel(n) {
 }
 
 const BADGE_SIZES = {
-    lg: { min: 32, max: 44, base: 40 },
-    md: { min: 24, max: 34, base: 30 },
-    sm: { min: 16, max: 22, base: 20 }
+    lg: { min: 56, max: 77, base: 70 },
+    md: { min: 42, max: 60, base: 53 },
+    sm: { min: 28, max: 39, base: 35 }
 };
 
 function badgeRadius(viewScale, tier) {
@@ -432,7 +432,7 @@ function addEditableDim(layer, opts) {
     text.setAttribute('x', opts.x);
     text.setAttribute('y', opts.y);
     text.setAttribute('fill', opts.fill || '#ffffff');
-    text.setAttribute('font-size', opts.fontSize || 22);
+    text.setAttribute('font-size', opts.fontSize || 39);
     text.setAttribute('font-weight', opts.fontWeight || '700');
     text.setAttribute('text-anchor', opts.anchor || 'middle');
     text.setAttribute('dominant-baseline', 'middle');

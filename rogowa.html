@@ -109,13 +109,13 @@
     .dim-editable.dim-green .dim-hit {
       fill: rgba(16, 185, 129, 0.42);
       stroke: #10b981;
-      stroke-width: 2.5;
+      stroke-width: 4.5;
       animation: rogPulse 2.5s ease-in-out infinite;
     }
     .dim-editable.dim-green:hover .dim-hit {
       fill: rgba(16, 185, 129, 0.5);
       stroke: #34d399;
-      stroke-width: 3;
+      stroke-width: 5;
     }
     .dim-editable.dim-green text {
       fill: #ffffff;
@@ -131,7 +131,7 @@
     .dim-result-board-dim .dim-hit-static {
       fill: rgba(255, 252, 248, 0.96);
       stroke: #C9C4BB;
-      stroke-width: 2.5;
+      stroke-width: 4.5;
       pointer-events: none;
     }
 
@@ -139,7 +139,7 @@
     .dim-editable.dim-green-badge .dim-badge-ring {
       fill: rgba(16, 185, 129, 0.38);
       stroke: #10b981;
-      stroke-width: 3;
+      stroke-width: 5;
       animation: rogPulse 2.5s ease-in-out infinite;
       pointer-events: all;
       cursor: pointer;
@@ -147,7 +147,7 @@
     .dim-editable.dim-green-badge:hover .dim-badge-ring {
       fill: rgba(16, 185, 129, 0.55);
       stroke: #34d399;
-      stroke-width: 3.5;
+      stroke-width: 6;
       animation-play-state: paused;
     }
     .dim-editable.dim-green-badge .dim-badge-num {
@@ -165,7 +165,7 @@
     .dim-result-badge .dim-badge-ring {
       fill: rgba(255, 252, 248, 0.96);
       stroke: #C9C4BB;
-      stroke-width: 2.5;
+      stroke-width: 4.5;
     }
     .dim-result-badge .dim-badge-num {
       fill: #3D3A36;
@@ -179,8 +179,8 @@
     }
 
     @keyframes rogPulse {
-      0%, 100% { fill: rgba(16, 185, 129, 0.28); stroke-width: 2.5; }
-      50% { fill: rgba(16, 185, 129, 0.52); stroke-width: 3.5; }
+      0%, 100% { fill: rgba(16, 185, 129, 0.28); stroke-width: 4.5; }
+      50% { fill: rgba(16, 185, 129, 0.52); stroke-width: 6; }
     }
 
     .params-hidden { display: none; }
@@ -280,8 +280,8 @@ function syncAllDimHitRects() {
     const text = g.querySelector('text');
     const rect = g.querySelector('.dim-hit, .dim-hit-static');
     if (!text || !rect) return;
-    const padX = parseFloat(g.dataset.hitPadX || '12');
-    const padY = parseFloat(g.dataset.hitPadY || '10');
+    const padX = parseFloat(g.dataset.hitPadX || '21');
+    const padY = parseFloat(g.dataset.hitPadY || '18');
     placeHitRectFromElement(rect, text, padX, padY);
     applyHitRectRound(rect);
   });
@@ -385,8 +385,8 @@ function addEditableDim(layer, opts) {
   g.setAttribute('data-field', opts.field);
   g.setAttribute('role', 'button');
   g.setAttribute('tabindex', '0');
-  g.dataset.hitPadX = String(opts.hitPadX ?? 12);
-  g.dataset.hitPadY = String(opts.hitPadY ?? 10);
+  g.dataset.hitPadX = String(opts.hitPadX ?? 21);
+  g.dataset.hitPadY = String(opts.hitPadY ?? 18);
 
   const hit = document.createElementNS(SVG_NS, 'rect');
   hit.setAttribute('class', 'dim-hit');
@@ -395,7 +395,7 @@ function addEditableDim(layer, opts) {
   const text = document.createElementNS(SVG_NS, 'text');
   text.setAttribute('x', opts.x);
   text.setAttribute('y', opts.y);
-  text.setAttribute('font-size', opts.fontSize || 36);
+  text.setAttribute('font-size', opts.fontSize || 63);
   text.setAttribute('font-weight', '800');
   text.setAttribute('font-family', 'sans-serif');
   text.setAttribute('text-anchor', opts.anchor || 'middle');
@@ -417,8 +417,8 @@ function addResultDim(layer, opts) {
   const g = document.createElementNS(SVG_NS, 'g');
   g.setAttribute('class', 'dim-result-board-dim');
   if (opts.field) g.setAttribute('data-field', opts.field);
-  g.dataset.hitPadX = String(opts.hitPadX ?? 12);
-  g.dataset.hitPadY = String(opts.hitPadY ?? 10);
+  g.dataset.hitPadX = String(opts.hitPadX ?? 21);
+  g.dataset.hitPadY = String(opts.hitPadY ?? 18);
   if (opts.groupTransform) g.setAttribute('transform', opts.groupTransform);
 
   const hit = document.createElementNS(SVG_NS, 'rect');
@@ -428,7 +428,7 @@ function addResultDim(layer, opts) {
   const text = document.createElementNS(SVG_NS, 'text');
   text.setAttribute('x', opts.x);
   text.setAttribute('y', opts.y);
-  text.setAttribute('font-size', opts.fontSize || 36);
+  text.setAttribute('font-size', opts.fontSize || 63);
   text.setAttribute('font-weight', '800');
   text.setAttribute('font-family', 'sans-serif');
   text.setAttribute('text-anchor', opts.anchor || 'middle');
@@ -536,7 +536,7 @@ function draw() {
   const labelOpts = function(field, midp, offX, offY, txt, transform) {
     return {
       field: field, x: midp[0]+offX, y: midp[1]+offY,
-      text: txt, fontSize: 36, anchor: 'middle', textTransform: transform
+      text: txt, fontSize: 63, anchor: 'middle', textTransform: transform
     };
   };
 
@@ -548,10 +548,10 @@ function draw() {
     g.setAttribute('class', 'dim-result-board-dim');
     var c = document.createElementNS(SVG_NS, 'circle');
     c.setAttribute('cx', cx); c.setAttribute('cy', cy);
-    c.setAttribute('r', 40);
+    c.setAttribute('r', 70);
     c.setAttribute('fill', '#fff');
     c.setAttribute('stroke', '#C4BFB6');
-    c.setAttribute('stroke-width', '2');
+    c.setAttribute('stroke-width', '3.5');
     g.appendChild(c);
     var t = document.createElementNS(SVG_NS, 'text');
     t.setAttribute('x', cx); t.setAttribute('y', cy);
@@ -559,14 +559,14 @@ function draw() {
     t.setAttribute('dominant-baseline', 'middle');
     t.setAttribute('font-family', 'sans-serif');
     var n = document.createElementNS(SVG_NS, 'tspan');
-    n.setAttribute('x', cx); n.setAttribute('dy', '-8');
-    n.setAttribute('font-size', '30'); n.setAttribute('font-weight', '700');
+    n.setAttribute('x', cx); n.setAttribute('dy', '-14');
+    n.setAttribute('font-size', '53'); n.setAttribute('font-weight', '700');
     n.setAttribute('fill', '#3D3A36');
     n.textContent = val;
     t.appendChild(n);
     var u = document.createElementNS(SVG_NS, 'tspan');
-    u.setAttribute('x', cx); u.setAttribute('dy', '20');
-    u.setAttribute('font-size', '20'); u.setAttribute('font-weight', '400');
+    u.setAttribute('x', cx); u.setAttribute('dy', '35');
+    u.setAttribute('font-size', '35'); u.setAttribute('font-weight', '400');
     u.setAttribute('fill', '#6B6660');
     u.textContent = 'mm';
     t.appendChild(u);
@@ -583,7 +583,7 @@ function draw() {
     var c = document.createElementNS(SVG_NS, 'circle');
     c.setAttribute('class', 'dim-badge-ring');
     c.setAttribute('cx', cx); c.setAttribute('cy', cy);
-    c.setAttribute('r', 45);
+    c.setAttribute('r', 79);
     g.appendChild(c);
     var t = document.createElementNS(SVG_NS, 'text');
     t.setAttribute('x', cx); t.setAttribute('y', cy);
@@ -593,13 +593,13 @@ function draw() {
     var n = document.createElementNS(SVG_NS, 'tspan');
     n.setAttribute('class', 'dim-badge-num');
     n.setAttribute('x', cx); n.setAttribute('dy', '-8');
-    n.setAttribute('font-size', '32');
+    n.setAttribute('font-size', '56');
     n.textContent = val;
     t.appendChild(n);
     var u = document.createElementNS(SVG_NS, 'tspan');
     u.setAttribute('class', 'dim-badge-label');
-    u.setAttribute('x', cx); u.setAttribute('dy', '22');
-    u.setAttribute('font-size', '18');
+    u.setAttribute('x', cx); u.setAttribute('dy', '38');
+    u.setAttribute('font-size', '32');
     u.textContent = 'mm';
     t.appendChild(u);
     g.appendChild(t);
@@ -631,7 +631,7 @@ function draw() {
 
   // Type label (green editable) inside cabinet
   var typLabels = { 'jednostronna': 'Jednostronna', 'dwustronna-lewa': 'Dwustronna lewa', 'dwustronna-prawa': 'Dwustronna prawa' };
-  addEditableDim(dimsGroup, { field: 'T', x: x0 + A * 0.5, y: y0 + B * 0.3, text: 'Typ: ' + (typLabels[typ] || typ), fontSize: 24, hitPadX: 24 });
+  addEditableDim(dimsGroup, { field: 'T', x: x0 + A * 0.5, y: y0 + B * 0.3, text: 'Typ: ' + (typLabels[typ] || typ), fontSize: 42, hitPadX: 42 });
 
   // Front labels (white badges) — tangent to front edge from outside
   var feMid = [feX + feLen / 2, feY + grubosc / 2];
@@ -648,10 +648,10 @@ function draw() {
   var gCircle = document.createElementNS(SVG_NS, 'circle');
   gCircle.setAttribute('cx', feMid[0] - 78);
   gCircle.setAttribute('cy', feMid[1]);
-  gCircle.setAttribute('r', '26');
+  gCircle.setAttribute('r', '46');
   gCircle.setAttribute('fill', COLOR_EDIT);
   gCircle.setAttribute('stroke', '#fff');
-  gCircle.setAttribute('stroke-width', '3');
+  gCircle.setAttribute('stroke-width', '5');
   gBadge.appendChild(gCircle);
   var gText = document.createElementNS(SVG_NS, 'text');
   gText.setAttribute('x', feMid[0] - 78);
