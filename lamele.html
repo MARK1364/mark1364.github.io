@@ -980,7 +980,7 @@
         const frontLayer = document.createElementNS(SVG_NS, 'g');
         frontLayer.setAttribute('class', 'dim-front-layer');
         const isCountMode = document.getElementById('mode').value === 'count';
-        const p = 250;
+        const p = 280;
         svg.setAttribute('viewBox', `${-p} ${-p} ${boardW + p * 2} ${boardH + p * 3.5}`);
 
         const dimColor = "#667eea";
@@ -1216,7 +1216,7 @@
         addEditableDim(frontLayer, {
             field: 'mode',
             x: boardW / 2,
-            y: boardH / 2 + 160,
+            y: boardH / 2 + 300,
             text: 'Tryb: ' + modeLabel,
             fontSize: 126,
             hitPadX: 84
