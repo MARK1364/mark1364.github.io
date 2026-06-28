@@ -610,24 +610,24 @@ function draw() {
     });
     dimsGroup.appendChild(g);
   }
-  addWhiteBadge(m[0], m[1] + 42, A - 18);
-  addGreenBadge(m[0], m[1] - 45, A, 'A');
+  addWhiteBadge(m[0], m[1] + 74, A - 18);
+  addGreenBadge(m[0], m[1] - 78, A, 'A');
 
   m = mid(p1, p6);
-  addGreenBadge(m[0] - 48, m[1], B, 'B');
-  addWhiteBadge(m[0] + 42, m[1], B - 18);
+  addGreenBadge(m[0] - 84, m[1], B, 'B');
+  addWhiteBadge(m[0] + 74, m[1], B - 18);
 
   m = mid(p5, p6);
-  addGreenBadge(m[0], m[1] + 48, C, 'C');
+  addGreenBadge(m[0], m[1] + 84, C, 'C');
 
   m = mid(p2, p3);
-  addGreenBadge(m[0] + 48, m[1], F, 'F');
+  addGreenBadge(m[0] + 84, m[1], F, 'F');
 
   m = mid(p3, p4);
-  addGreenBadge(m[0] + 20, m[1] - 64, E, 'E');
+  addGreenBadge(m[0] + 35, m[1] - 112, E, 'E');
 
   m = mid(p4, p5);
-  addGreenBadge(m[0] - 55, m[1], D, 'D');
+  addGreenBadge(m[0] - 96, m[1], D, 'D');
 
   // Type label (green editable) inside cabinet
   var typLabels = { 'jednostronna': 'Jednostronna', 'dwustronna-lewa': 'Dwustronna lewa', 'dwustronna-prawa': 'Dwustronna prawa' };
@@ -635,9 +635,9 @@ function draw() {
 
   // Front labels (white badges) — tangent to front edge from outside
   var feMid = [feX + feLen / 2, feY + grubosc / 2];
-  addWhiteBadge(feX + feLen / 2, feY + grubosc + 40, Math.round(feLen));
+  addWhiteBadge(feX + feLen / 2, feY + grubosc + 70, Math.round(feLen));
 
-  addWhiteBadge(fdX + grubosc + 40, fdY + fdLen / 2, Math.round(fdLen));
+  addWhiteBadge(fdX + grubosc + 70, fdY + fdLen / 2, Math.round(fdLen));
 
   // Green editable badge for front thickness
   var gBadge = document.createElementNS(SVG_NS, 'g');
@@ -646,7 +646,7 @@ function draw() {
   gBadge.setAttribute('role', 'button');
   gBadge.setAttribute('tabindex', '0');
   var gCircle = document.createElementNS(SVG_NS, 'circle');
-  gCircle.setAttribute('cx', feMid[0] - 78);
+  gCircle.setAttribute('cx', feMid[0] - 130);
   gCircle.setAttribute('cy', feMid[1]);
   gCircle.setAttribute('r', '46');
   gCircle.setAttribute('fill', COLOR_EDIT);
@@ -654,7 +654,7 @@ function draw() {
   gCircle.setAttribute('stroke-width', '5');
   gBadge.appendChild(gCircle);
   var gText = document.createElementNS(SVG_NS, 'text');
-  gText.setAttribute('x', feMid[0] - 78);
+  gText.setAttribute('x', feMid[0] - 130);
   gText.setAttribute('y', feMid[1]+1);
   gText.setAttribute('font-size', '18');
   gText.setAttribute('font-weight', '800');
