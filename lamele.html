@@ -25,6 +25,12 @@
             min-width: 0;
             display: flex;
             flex-direction: column;
+        }
+        .content-area {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: row;
             gap: 6px;
         }
         .svg-container {
@@ -32,17 +38,31 @@
             border-radius: 10px;
             padding: 10px;
             flex: 1;
-            min-height: 0;
+            min-width: 0;
             display: flex;
             flex-direction: column;
             border: 1px solid #C9C4BB;
             position: relative;
         }
-        .svg-hint {
+        .calc-panel {
+            width: 260px;
             flex-shrink: 0;
-            font-size: 13px;
-            color: #6E6962;
-            margin-bottom: 4px;
+            background: #F4F1EB;
+            border-radius: 10px;
+            border: 1px solid #C9C4BB;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+        .calc-panel h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #5C4F72;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
         }
         svg {
             border-radius: 6px;
@@ -258,53 +278,47 @@
             border-color: #7A6B8F;
         }
         .calc-sheet {
-            background: #EDE9E2;
-            border-radius: 8px;
-            padding: 10px 12px;
-            margin-top: 6px;
-            border: 1px solid #D5D0C8;
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 1px;
         }
         .calc-row {
             display: flex;
             flex-direction: column;
-            align-items: stretch;
-            gap: 3px;
-            padding: 8px 0;
+            gap: 2px;
+            padding: 6px 0;
             border-bottom: 1px solid #D8D3CB;
         }
         .calc-row:last-of-type {
             border-bottom: none;
-            padding-bottom: 4px;
+            padding-bottom: 0;
         }
         .calc-row-label {
-            color: #6E6962;
-            font-weight: 600;
-            font-size: 13px;
-            line-height: 1.2;
+            color: #5C4F72;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
         }
         .calc-row-value {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             gap: 4px 6px;
-            font-size: 15px;
-            line-height: 1.4;
+            font-size: 13px;
             color: #3D3A36;
             font-variant-numeric: tabular-nums;
         }
         .calc-qty {
-            font-weight: 800;
-            font-size: 16px;
+            font-weight: 700;
+            font-size: 14px;
             color: #3D3A36;
         }
         .calc-row-value input {
-            width: 72px;
-            height: 34px;
-            padding: 4px 8px;
-            font-size: 15px;
+            width: 60px;
+            height: 28px;
+            padding: 2px 6px;
+            font-size: 13px;
             font-weight: 600;
             text-align: right;
             border: 1px solid #C9C4BB;
@@ -316,23 +330,49 @@
             outline: none;
             border-color: #7A6B8F;
         }
-        .calc-unit { color: #6E6962; font-size: 14px; }
+        .calc-unit { color: #6E6962; font-size: 12px; }
         .calc-eq { color: #6E6962; }
         .calc-result {
-            font-weight: 800;
-            font-size: 16px;
+            font-weight: 700;
+            font-size: 14px;
             color: #5C4F72;
             white-space: nowrap;
+        }
+        .calc-row-sub {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .calc-row-sub-label {
+            color: #6E6962;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .calc-row-sub input {
+            width: 52px;
+            height: 26px;
+            padding: 2px 6px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: right;
+            border: 1px solid #C9C4BB;
+            border-radius: 6px;
+            background: #FFFCF8;
+            color: #3D3A36;
+        }
+        .calc-row-sub input:focus {
+            outline: none;
+            border-color: #7A6B8F;
         }
         .calc-total-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 1px solid #C9C4BB;
-            margin-top: 4px;
-            padding-top: 10px;
-            font-size: 17px;
-            font-weight: 700;
+            border-top: 2px solid #5C4F72;
+            padding-top: 8px;
+            margin-top: 2px;
+            font-size: 15px;
+            font-weight: 800;
             color: #5C4F72;
         }
         .calc-total-row span:last-child {
@@ -344,7 +384,9 @@
             body { overflow: auto; -webkit-text-size-adjust: 100%; }
             .container { flex-direction: column; }
             .right-panel { flex: none; width: 100%; min-height: 260px; }
+            .content-area { flex-direction: column; flex: none; }
             .svg-container { min-height: 40vh; }
+            .calc-panel { width: 100%; border-radius: 0; border-left: none; border-right: none; }
             h1 { font-size: 22px; }
             h2 { font-size: 17px; }
             .calc-row-value { font-size: 16px; }
@@ -370,70 +412,73 @@
             <input type="number" id="count" value="">
             <input type="number" id="endEdge" value="">
         </div>
-        <div class="svg-container" id="svgContainer">
-            <p class="svg-hint">Prostokąty = gabaryty płyty · zielone kółka = edycja · białe kółka = wynik</p>
-            <svg id="visualizer" viewBox="0 0 2500 1500"></svg>
-            <div id="dimEditor" class="dim-editor" hidden>
-                <label id="dimEditorLabel" for="dimEditorInput">Wymiar</label>
-                <input type="number" id="dimEditorInput">
-                <select id="dimEditorSelect" hidden>
-                    <option value="count">Ile wejdzie w płytę</option>
-                    <option value="width">Wylicz szerokość płyty</option>
-                </select>
-                <div class="dim-editor-actions">
-                    <button type="button" class="dim-editor-cancel" id="dimEditorCancel">Anuluj</button>
-                    <button type="button" class="dim-editor-ok" id="dimEditorOk">OK</button>
+        <div class="content-area">
+            <div class="svg-container" id="svgContainer">
+                <svg id="visualizer" viewBox="0 0 2500 1500"></svg>
+                <div id="dimEditor" class="dim-editor" hidden>
+                    <label id="dimEditorLabel" for="dimEditorInput">Wymiar</label>
+                    <input type="number" id="dimEditorInput">
+                    <select id="dimEditorSelect" hidden>
+                        <option value="count">Ile wejdzie w płytę</option>
+                        <option value="width">Wylicz szerokość płyty</option>
+                    </select>
+                    <div class="dim-editor-actions">
+                        <button type="button" class="dim-editor-cancel" id="dimEditorCancel">Anuluj</button>
+                        <button type="button" class="dim-editor-ok" id="dimEditorOk">OK</button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <h2>Wyliczenia</h2>
-        <div class="calc-sheet">
-            <div class="calc-row">
-                <div class="calc-row-label">Obrzeże</div>
-                <div class="calc-row-value">
-                    (<span class="calc-qty" id="edgeMbQty">0,0 mb</span>)
-                    <span class="calc-unit">×</span>
-                    <input type="number" id="edgePrice" value="2.50" step="0.01" min="0" oninput="calculateCosts()">
-                    <span class="calc-unit">PLN/m</span>
-                    <span class="calc-eq">=</span>
-                    <span class="calc-result" id="edgeCostResult">0 PLN</span>
+            <div class="calc-panel">
+                <h2>Kalkulacje</h2>
+                <div class="calc-sheet">
+                    <div class="calc-row">
+                        <div class="calc-row-label">Obrzeże</div>
+                        <div class="calc-row-value">
+                            (<span class="calc-qty" id="edgeMbQty">0,0 mb</span>)
+                            <span class="calc-unit">×</span>
+                            <input type="number" id="edgePrice" value="2.50" step="0.01" min="0" oninput="calculateCosts()">
+                            <span class="calc-unit">PLN/m</span>
+                            <span class="calc-eq">=</span>
+                            <span class="calc-result" id="edgeCostResult">0 PLN</span>
+                        </div>
+                    </div>
+                    <div class="calc-row">
+                        <div class="calc-row-label">Płyta lameli</div>
+                        <div class="calc-row-sub">
+                            <span class="calc-row-sub-label">Wys. lameli</span>
+                            <input type="number" id="lamelWidth" value="35" min="1" step="1" oninput="calculate()">
+                            <span class="calc-unit">mm</span>
+                        </div>
+                        <div class="calc-row-sub">
+                            <span class="calc-row-sub-label">Dł. listwy</span>
+                            <input type="number" id="slatLength" value="1500" min="100" max="4000" step="1" oninput="onSlatLengthInput()">
+                            <span class="calc-unit">mm</span>
+                        </div>
+                        <div class="calc-row-value">
+                            (<span class="calc-qty" id="lamelAreaQty">0,00 m²</span>)
+                            <span class="calc-unit">×</span>
+                            <input type="number" id="boardPrice" value="400" step="1" min="0" oninput="calculateCosts()">
+                            <span class="calc-unit">PLN/arkusz</span>
+                            <span class="calc-eq">=</span>
+                            <span class="calc-result" id="boardCostResult">0 PLN</span>
+                        </div>
+                    </div>
+                    <div class="calc-row">
+                        <div class="calc-row-label">Płyta bazowa</div>
+                        <div class="calc-row-value">
+                            (<span class="calc-qty" id="baseAreaQty">0,00 m²</span>)
+                            <span class="calc-unit">×</span>
+                            <input type="number" id="baseBoardPrice" value="400" step="1" min="0" oninput="calculateCosts()">
+                            <span class="calc-unit">PLN/arkusz</span>
+                            <span class="calc-eq">=</span>
+                            <span class="calc-result" id="baseBoardCostResult">0 PLN</span>
+                        </div>
+                    </div>
+                    <div class="calc-total-row">
+                        <span>SUMA</span>
+                        <span id="totalCostResult">0 PLN</span>
+                    </div>
                 </div>
-            </div>
-            <div class="calc-row">
-                <div class="calc-row-label">Płyta lameli</div>
-                <div class="calc-row-sub">
-                    <span class="calc-row-sub-label">Wysokość lameli</span>
-                    <input type="number" id="lamelWidth" value="35" min="1" step="1" oninput="calculate()">
-                    <span class="calc-unit">mm</span>
-                </div>
-                <div class="calc-row-sub">
-                    <span class="calc-row-sub-label">Długość listwy</span>
-                    <input type="number" id="slatLength" value="1500" min="100" max="4000" step="1" oninput="onSlatLengthInput()">
-                    <span class="calc-unit">mm</span>
-                </div>
-                <div class="calc-row-value">
-                    (<span class="calc-qty" id="lamelAreaQty">0,00 m²</span>)
-                    <span class="calc-unit">×</span>
-                    <input type="number" id="boardPrice" value="150" step="1" min="0" oninput="calculateCosts()">
-                    <span class="calc-unit">PLN/arkusz</span>
-                    <span class="calc-eq">=</span>
-                    <span class="calc-result" id="boardCostResult">0 PLN</span>
-                </div>
-            </div>
-            <div class="calc-row">
-                <div class="calc-row-label">Płyta bazowa</div>
-                <div class="calc-row-value">
-                    (<span class="calc-qty" id="baseAreaQty">0,00 m²</span>)
-                    <span class="calc-unit">×</span>
-                    <input type="number" id="baseBoardPrice" value="150" step="1" min="0" oninput="calculateCosts()">
-                    <span class="calc-unit">PLN/arkusz</span>
-                    <span class="calc-eq">=</span>
-                    <span class="calc-result" id="baseBoardCostResult">0 PLN</span>
-                </div>
-            </div>
-            <div class="calc-total-row">
-                <span>SUMA</span>
-                <span id="totalCostResult">0 PLN</span>
             </div>
         </div>
     </div>
