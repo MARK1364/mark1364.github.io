@@ -588,7 +588,7 @@ function calc() {
       c.setAttribute('r', 28);
       c.setAttribute('fill', '#fff');
       c.setAttribute('stroke', '#C4BFB6');
-      c.setAttribute('stroke-width', '4.5');
+      c.setAttribute('stroke-width', String(Math.max(0.8, Math.round(28/18*10)/10)));
       g.appendChild(c);
       var t = document.createElementNS(SVG_NS, 'text');
       t.setAttribute('x', cx); t.setAttribute('y', cy);
@@ -686,7 +686,7 @@ function calc() {
 
       var dimY = topY - 45;
       addWhiteBadge(bx, dimY - 46, spacingInner);
-      addWhiteBadge(kx, dimY - 46, grooveTopWidthMM);
+      addWhiteBadge(kx + 28, dimY - 46, grooveTopWidthMM);
     })();
 
     // One depth dimension line (h) at last groove on right side, with green circle
