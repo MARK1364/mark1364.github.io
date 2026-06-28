@@ -39,12 +39,16 @@
         .right-panel {
             flex: 1;
             min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
         .svg-container {
             background: #F0EDE7;
             border-radius: 10px;
             padding: 10px;
-            height: 100%;
+            flex: 1;
+            min-height: 0;
             display: flex;
             flex-direction: column;
             border: 1px solid #C9C4BB;
@@ -356,9 +360,8 @@
             body { overflow: auto; -webkit-text-size-adjust: 100%; }
             .container { flex-direction: column; height: auto; min-height: 100%; padding: 10px; gap: 10px; }
             .left-panel { flex: none; width: 100%; max-height: none; }
-            .right-panel { flex: none; width: 100%; min-height: 260px; height: 40vh; }
-            .form-grid { grid-template-columns: 1fr; gap: 6px; }
-            label { font-size: 18px; }
+            .right-panel { flex: none; width: 100%; min-height: 260px; }
+            .svg-container { min-height: 40vh; }
             h1 { font-size: 22px; }
             h2 { font-size: 17px; }
             .calc-row-value { font-size: 16px; }
@@ -376,7 +379,34 @@
             <option value="count">Ile wejdzie w płytę</option>
             <option value="width">Wylicz szerokość płyty</option>
         </select>
+    </div>
 
+    <div class="panel right-panel">
+        <div class="params-hidden" aria-hidden="true">
+            <input type="number" id="boardW" value="2500">
+            <input type="number" id="boardH" value="1500">
+            <input type="number" id="lamelaW" value="18">
+            <input type="number" id="spacing" value="20">
+            <input type="number" id="startEdge" value="20">
+            <input type="number" id="count" value="">
+            <input type="number" id="endEdge" value="">
+        </div>
+        <div class="svg-container" id="svgContainer">
+            <p class="svg-hint">Prostokąty = gabaryty płyty · zielone kółka = edycja · białe kółka = wynik</p>
+            <svg id="visualizer" viewBox="0 0 2500 1500"></svg>
+            <div id="dimEditor" class="dim-editor" hidden>
+                <label id="dimEditorLabel" for="dimEditorInput">Wymiar</label>
+                <input type="number" id="dimEditorInput">
+                <select id="dimEditorSelect" hidden>
+                    <option value="count">Ile wejdzie w płytę</option>
+                    <option value="width">Wylicz szerokość płyty</option>
+                </select>
+                <div class="dim-editor-actions">
+                    <button type="button" class="dim-editor-cancel" id="dimEditorCancel">Anuluj</button>
+                    <button type="button" class="dim-editor-ok" id="dimEditorOk">OK</button>
+                </div>
+            </div>
+        </div>
         <h2>Wyliczenia</h2>
         <div class="calc-sheet">
             <div class="calc-row">
@@ -425,34 +455,6 @@
             <div class="calc-total-row">
                 <span>SUMA</span>
                 <span id="totalCostResult">0 PLN</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="panel right-panel">
-        <div class="params-hidden" aria-hidden="true">
-            <input type="number" id="boardW" value="2500">
-            <input type="number" id="boardH" value="1500">
-            <input type="number" id="lamelaW" value="18">
-            <input type="number" id="spacing" value="20">
-            <input type="number" id="startEdge" value="20">
-            <input type="number" id="count" value="">
-            <input type="number" id="endEdge" value="">
-        </div>
-        <div class="svg-container" id="svgContainer">
-            <p class="svg-hint">Prostokąty = gabaryty płyty · zielone kółka = edycja · białe kółka = wynik</p>
-            <svg id="visualizer" viewBox="0 0 2500 1500"></svg>
-            <div id="dimEditor" class="dim-editor" hidden>
-                <label id="dimEditorLabel" for="dimEditorInput">Wymiar</label>
-                <input type="number" id="dimEditorInput">
-                <select id="dimEditorSelect" hidden>
-                    <option value="count">Ile wejdzie w płytę</option>
-                    <option value="width">Wylicz szerokość płyty</option>
-                </select>
-                <div class="dim-editor-actions">
-                    <button type="button" class="dim-editor-cancel" id="dimEditorCancel">Anuluj</button>
-                    <button type="button" class="dim-editor-ok" id="dimEditorOk">OK</button>
-                </div>
             </div>
         </div>
     </div>

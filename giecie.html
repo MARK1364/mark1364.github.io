@@ -19,28 +19,19 @@
     .container {
         display: flex;
         height: 100%;
-        gap: 8px;
-        padding: 8px;
+        padding: 0;
     }
         .panel {
             background: #F4F1EB;
-            border-radius: 10px;
-            padding: 8px 10px;
-            border: 1px solid #C9C4BB;
+            border-radius: 0;
+            padding: 0;
+            border: none;
         }
-    .left-panel {
-        flex: 0 0 320px;
-        overflow-y: auto;
-        max-height: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
     .right-panel {
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 2px;
         min-width: 0;
         position: relative;
     }
@@ -64,12 +55,6 @@
         flex: 1;
         min-height: 0;
     }
-    .svg-title {
-        font-size: 10px;
-        color: #6E6962;
-        text-align: center;
-        margin-top: 4px;
-    }
     h1 {
         font-size: 20px;
         font-weight: 600;
@@ -86,59 +71,8 @@
         background: linear-gradient(180deg, #7A6B8F, #5C4F72);
         border-radius: 2px;
     }
-    h2 {
-        font-size: 16px;
-        font-weight: 700;
-        color: #5C4F72;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin: 6px 0 3px;
-    }
-    .form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 4px 8px;
-    }
-    .input-group {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-    }
-    .input-group.full { grid-column: 1 / -1; }
-    label {
-        font-size: 17px;
-        font-weight: 500;
-        color: #5A5550;
-        line-height: 1.2;
-    }
-    input, select {
-        width: 100%;
-        padding: 6px 10px;
-        height: 40px;
-        background: #FFFCF8;
-        border: 1px solid #C9C4BB;
-        border-radius: 6px;
-        color: #3D3A36;
-        font-size: 16px;
-    }
-    input:focus, select:focus {
-        outline: none;
-        border-color: #7A6B8F;
-    }
-    .btn {
-        width: 100%;
-        padding: 8px 12px;
-        min-height: 44px;
-        background: #7A6B8F;
-        border: none;
-        border-radius: 6px;
-        color: #fff;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        margin-top: 4px;
-    }
-    .btn:hover { filter: brightness(1.08); }
+    input[type=hidden] { display: none; }
+    select[hidden] { display: none; }
     .dim-editable-r { cursor: pointer; }
     .dim-editable-r text { fill: #fff; font-weight: 800; pointer-events: none; }
     .dim-editable-r circle {
@@ -200,86 +134,35 @@
     .dim-editor-r-actions button:first-child { background: #EDE9E2; color: #5A5550; border: 1px solid #C9C4BB; }
     .dim-editor-r-actions button:last-child { background: #7A6B8F; color: #fff; }
     .dim-editor-r-actions button:last-child:hover { filter: brightness(1.08); }
-    .results {
-        background: #EDE9E2;
-        border-radius: 6px;
-        padding: 8px 10px;
-        margin-top: 4px;
-    }
-    .results h3 {
-        font-size: 17px;
-        font-weight: 700;
-        color: #a29bfe;
-        margin-bottom: 6px;
-    }
-    .result-item {
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 5px 0;
-        font-size: 16px;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .result-item:last-child { border-bottom: none; }
-    .result-label { color: #6E6962; font-weight: 500; }
-    .result-value { color: #3D3A36; font-weight: 600; }
-    .warning {
-        background: rgba(255, 69, 58, 0.15);
-        border: 1px solid rgba(255, 69, 58, 0.3);
-        border-radius: 4px;
-        padding: 8px;
-        margin-top: 4px;
-        color: #ff6b6b;
-        font-size: 15px;
-        line-height: 1.4;
-    }
+
 
     @media (max-width: 768px) {
         body { overflow: auto; -webkit-text-size-adjust: 100%; }
-        .container { flex-direction: column; height: auto; min-height: 100%; padding: 10px; gap: 10px; }
-        .left-panel { flex: none; width: 100%; max-height: none; }
-        .right-panel { flex: none; width: 100%; min-height: 240px; height: 42vh; }
-        .form-grid { grid-template-columns: 1fr; gap: 6px; }
-        label { font-size: 18px; }
-        h1 { font-size: 22px; }
-        h2 { font-size: 17px; }
-        .result-item { font-size: 17px; }
+        .container { flex-direction: column; }
+        .right-panel { flex: none; width: 100%; min-height: 240px; height: 100vh; }
     }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="panel left-panel">
-        <h1>Gięcie MDF</h1>
-        <h2>Parametry</h2>
-        <div class="form-grid">
-            <input id="skin" type="hidden" value="15">
-            <select id="angle" hidden onchange="calc()">
-                <option value="10">10°</option>
-                <option value="15" selected>15°</option>
-            </select>
-        </div>
-        <input id="T" type="hidden" value="18">
-        <input id="lenR" type="hidden" value="100">
-        <input id="leftFlat" type="hidden" value="300">
-        <input id="rightFlat" type="hidden" value="50">
-        <input id="bend" type="hidden" value="90">
-        <button class="btn" onclick="calc()">Oblicz</button>
-        <div class="results">
-            <h3>Wyniki</h3>
-            <div id="out"></div>
-        </div>
-    </div>
+    <input id="skin" type="hidden" value="15">
+    <select id="angle" hidden onchange="calc()">
+        <option value="10">10°</option>
+        <option value="15" selected>15°</option>
+    </select>
+    <input id="T" type="hidden" value="18">
+    <input id="lenR" type="hidden" value="100">
+    <input id="leftFlat" type="hidden" value="300">
+    <input id="rightFlat" type="hidden" value="50">
+    <input id="bend" type="hidden" value="90">
     
     <div class="panel right-panel">
         <div class="svg-container">
             <svg id="svg"></svg>
-            <div class="svg-title">Przekrój na płasko</div>
         </div>
         <div class="svg-container">
             <svg id="svgBent"></svg>
-            <div class="svg-title">Przekrój gięty</div>
         </div>
     <div id="dimEditor" class="dim-editor-r" hidden>
       <label id="dimEditorLabel">Wartość (mm)</label>
@@ -314,7 +197,6 @@ function calc() {
     const leftFlatMM  = parseFloat(document.getElementById("leftFlat").value);
     const rightFlatMM = parseFloat(document.getElementById("rightFlat").value);
 
-    const out = document.getElementById("out");
     const svg = document.getElementById("svg");
     const svgBent = document.getElementById("svgBent");
 
@@ -335,20 +217,6 @@ function calc() {
     const spacing = arcLen / n;
     const innerArcLen = (R - T) * bend;
     const spacingInner = innerArcLen / n;
-
-    let resultsHTML = `
-        <div class="result-item"><span class="result-label">Głębokość frezowania</span><span class="result-value">${skin.toFixed(2)} mm</span></div>
-        <div class="result-item"><span class="result-label">Szerokość nacięcia</span><span class="result-value">${kerfWidth.toFixed(2)} mm</span></div>
-        <div class="result-item"><span class="result-label">Odcinek zewnętrzny</span><span class="result-value">${spacing.toFixed(2)} mm</span></div>
-        <div class="result-item"><span class="result-label">Odcinek wewnętrzny</span><span class="result-value">${spacingInner.toFixed(2)} mm</span></div>
-        <div class="result-item"><span class="result-label">Liczba rowków V</span><span class="result-value">${n}</span></div>
-    `;
-
-    if (R < 2*T) {
-        resultsHTML += `<div class="warning">Promień łuku R musi być większy lub równy 2× grubości MDF (2×${T}=${2*T}mm)</div>`;
-    }
-
-    out.innerHTML = resultsHTML;
 
     // --- RYSOWANIE 1: PRZEKRÓJ NA PŁASKO ---
     svg.innerHTML = "";
