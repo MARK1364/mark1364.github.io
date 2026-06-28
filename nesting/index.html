@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartBox Nesting (Math Engine)</title>
+    <title>Rozkrój</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -11,8 +11,7 @@
     <div class="app-container">
         <aside class="sidebar">
             <div class="logo">
-                <h2>SmartBox Nesting Engine</h2>
-                <p>Mathematical 2D Bin Packing</p>
+                <h2>Rozkrój</h2>
             </div>
 
             <div class="panel">
@@ -28,13 +27,13 @@
                     </div>
                 </div>
                 <div class="row mt-2">
-                    <div class="input-group">
+                    <div class="input-group" style="flex: 0.6;">
                         <label for="kerf">Rzaz piły (mm)</label>
                         <input type="number" id="kerf" value="4">
                     </div>
-                    <div class="input-group">
+                    <div class="input-group" style="flex: 1.4;">
                         <label for="optimizeMode">Tryb Rozkroju</label>
-                        <select id="optimizeMode" style="background-color: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); padding: 8px 10px; border-radius: 4px; font-family: inherit; font-size: 0.9rem;">
+                        <select id="optimizeMode" style="background-color: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); padding: 6px 6px; border-radius: 4px; font-family: inherit; font-size: 0.8rem;">
                             <option value="fast">Szybki (0.1s)</option>
                             <option value="pro">Profesjonalny (Deep Search)</option>
                         </select>
@@ -52,10 +51,10 @@
                         <thead>
                             <tr>
                                 <th>Nazwa formatki</th>
-                                <th width="65">Szer.</th>
-                                <th width="65">Wys.</th>
-                                <th width="45">Szt.</th>
-                                <th width="65" title="Kierunek usłojenia / zgoda na obrót">Obrót</th>
+                                <th width="50">Szer.</th>
+                                <th width="50">Wys.</th>
+                                <th width="40">Szt.</th>
+                                <th width="85" title="Kierunek usłojenia / zgoda na obrót">Obrót</th>
                                 <th width="35"></th>
                             </tr>
                         </thead>
