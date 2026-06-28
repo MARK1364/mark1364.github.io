@@ -26,12 +26,10 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached =>
-      cached || fetch(e.request).then(res => {
-        const copy = res.clone();
-        caches.open(CACHE).then(cache => cache.put(e.request, copy));
-        return res;
-      }).catch(() => caches.match('index.html'))
-    )
+    fetch(e.request).then(res => {
+      const copy = res.clone();
+      caches.open(CACHE).then(cache => cache.put(e.request, copy));
+      return res;
+    }).catch(() => caches.match(e.request).then(cached => cached || caches.match('index.html')))
   );
 });
