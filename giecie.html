@@ -712,7 +712,7 @@ function calc() {
       tickB.setAttribute('stroke', '#667eea'); tickB.setAttribute('stroke-width', '0.8');
       svg.appendChild(tickB);
       // Green circle for h value
-      var hCx = extX + 22, hCy = dimY;
+      var hCx = extX + 22 + 32, hCy = dimY;
       svg.appendChild(makeDimBadge(hCx, hCy, 'h', h, 'skin', 1, 40, { svgElId: 'svg', badgeR: 32 }));
     }
 
