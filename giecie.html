@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23D8D3CB' rx='12'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-size='32' font-weight='800' font-family='sans-serif' fill='%235C4F72'%3ESP%3C/text%3E%3C/svg%3E">
+<title>Kerf Bending MDF – Przekrój parametryczny</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #E8E4DD;
+            color: #3D3A36;
+            overflow: hidden;
+            font-size: 16px;
+        }
+    .container {
+        display: flex;
+        height: 100%;
+        gap: 8px;
+        padding: 8px;
+    }
+        .panel {
+            background: #F4F1EB;
+            border-radius: 10px;
+            padding: 8px 10px;
+            border: 1px solid #C9C4BB;
+        }
+    .left-panel {
+        flex: 0 0 320px;
+        overflow-y: auto;
+        max-height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .right-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+        position: relative;
+    }
+    .svg-container {
+        background: #F0EDE7;
+        border-radius: 10px;
+        padding: 10px;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #C9C4BB;
+    }
+    svg {
+        border-radius: 6px;
+        background: #EDE9E2;
+        width: 100%;
+        height: 100%;
+        flex: 1;
+        min-height: 0;
+    }
+    .svg-title {
+        font-size: 10px;
+        color: #6E6962;
+        text-align: center;
+        margin-top: 4px;
+    }
+    h1 {
+        font-size: 20px;
+        font-weight: 600;
+        color: #3D3A36;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 2px;
+    }
+    h1::before {
+        content: "";
+        width: 3px;
+        height: 18px;
+        background: linear-gradient(180deg, #7A6B8F, #5C4F72);
+        border-radius: 2px;
+    }
+    h2 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #5C4F72;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 6px 0 3px;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px 8px;
+    }
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .input-group.full { grid-column: 1 / -1; }
+    label {
+        font-size: 17px;
+        font-weight: 500;
+        color: #5A5550;
+        line-height: 1.2;
+    }
+    input, select {
+        width: 100%;
+        padding: 6px 10px;
+        height: 40px;
+        background: #FFFCF8;
+        border: 1px solid #C9C4BB;
+        border-radius: 6px;
+        color: #3D3A36;
+        font-size: 16px;
+    }
+    input:focus, select:focus {
+        outline: none;
+        border-color: #7A6B8F;
+    }
+    .btn {
+        width: 100%;
+        padding: 8px 12px;
+        min-height: 44px;
+        background: #7A6B8F;
+        border: none;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 4px;
+    }
+    .btn:hover { filter: brightness(1.08); }
+    .dim-editable-r { cursor: pointer; }
+    .dim-editable-r text { fill: #fff; font-weight: 800; pointer-events: none; }
+    .dim-editable-r circle {
+      fill: rgba(16, 185, 129, 0.38);
+      stroke: #10b981;
+      animation: rPulse 2.5s ease-in-out infinite;
+    }
+    .dim-editable-r:hover circle {
+      fill: rgba(16, 185, 129, 0.55);
+      stroke: #34d399;
+      animation-play-state: paused;
+    }
+    @keyframes rPulse {
+      0%, 100% { fill: rgba(16, 185, 129, 0.28); }
+      50% { fill: rgba(16, 185, 129, 0.52); }
+    }
+    .dim-editable-rect { cursor: pointer; }
+    .dim-editable-rect .dim-hit {
+      fill: rgba(16, 185, 129, 0.38);
+      stroke: #10b981;
+      stroke-width: 2.5;
+      animation: rectPulse 2.5s ease-in-out infinite;
+    }
+    .dim-editable-rect:hover .dim-hit {
+      fill: rgba(16, 185, 129, 0.55);
+      stroke: #34d399;
+      animation-play-state: paused;
+    }
+    .dim-editable-rect text {
+      fill: #fff;
+      font-weight: 800;
+      pointer-events: none;
+    }
+    @keyframes rectPulse {
+      0%, 100% { fill: rgba(16, 185, 129, 0.28); }
+      50% { fill: rgba(16, 185, 129, 0.52); }
+    }
+    .dim-editor-r {
+      position: absolute;
+      z-index: 20;
+      background: #FFFCF8;
+      border: 2px solid #7A6B8F;
+      border-radius: 8px;
+      padding: 10px 12px;
+      box-shadow: 0 6px 20px rgba(61, 58, 54, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 150px;
+    }
+    .dim-editor-r[hidden] { display: none !important; }
+    .dim-editor-r label { font-size: 13px; font-weight: 600; color: #5C4F72; }
+    .dim-editor-r input { height: 36px; font-size: 16px; }
+    .dim-editor-r-actions { display: flex; gap: 6px; }
+    .dim-editor-r-actions button {
+      flex: 1; padding: 6px 10px; border: none; border-radius: 6px;
+      font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .dim-editor-r-actions button:first-child { background: #EDE9E2; color: #5A5550; border: 1px solid #C9C4BB; }
+    .dim-editor-r-actions button:last-child { background: #7A6B8F; color: #fff; }
+    .dim-editor-r-actions button:last-child:hover { filter: brightness(1.08); }
+    .results {
+        background: #EDE9E2;
+        border-radius: 6px;
+        padding: 8px 10px;
+        margin-top: 4px;
+    }
+    .results h3 {
+        font-size: 17px;
+        font-weight: 700;
+        color: #a29bfe;
+        margin-bottom: 6px;
+    }
+    .result-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 5px 0;
+        font-size: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .result-item:last-child { border-bottom: none; }
+    .result-label { color: #6E6962; font-weight: 500; }
+    .result-value { color: #3D3A36; font-weight: 600; }
+    .warning {
+        background: rgba(255, 69, 58, 0.15);
+        border: 1px solid rgba(255, 69, 58, 0.3);
+        border-radius: 4px;
+        padding: 8px;
+        margin-top: 4px;
+        color: #ff6b6b;
+        font-size: 15px;
+        line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+        body { overflow: auto; -webkit-text-size-adjust: 100%; }
+        .container { flex-direction: column; height: auto; min-height: 100%; padding: 10px; gap: 10px; }
+        .left-panel { flex: none; width: 100%; max-height: none; }
+        .right-panel { flex: none; width: 100%; min-height: 240px; height: 42vh; }
+        .form-grid { grid-template-columns: 1fr; gap: 6px; }
+        label { font-size: 18px; }
+        h1 { font-size: 22px; }
+        h2 { font-size: 17px; }
+        .result-item { font-size: 17px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="panel left-panel">
+        <h1>Gięcie MDF</h1>
+        <h2>Parametry</h2>
+        <div class="form-grid">
+            <input id="skin" type="hidden" value="15">
+            <select id="angle" hidden onchange="calc()">
+                <option value="10">10°</option>
+                <option value="15" selected>15°</option>
+            </select>
+        </div>
+        <input id="T" type="hidden" value="18">
+        <input id="lenR" type="hidden" value="100">
+        <input id="leftFlat" type="hidden" value="300">
+        <input id="rightFlat" type="hidden" value="50">
+        <input id="bend" type="hidden" value="90">
+        <button class="btn" onclick="calc()">Oblicz</button>
+        <div class="results">
+            <h3>Wyniki</h3>
+            <div id="out"></div>
+        </div>
+    </div>
+    
+    <div class="panel right-panel">
+        <div class="svg-container">
+            <svg id="svg"></svg>
+            <div class="svg-title">Przekrój na płasko</div>
+        </div>
+        <div class="svg-container">
+            <svg id="svgBent"></svg>
+            <div class="svg-title">Przekrój gięty</div>
+        </div>
+    <div id="dimEditor" class="dim-editor-r" hidden>
+      <label id="dimEditorLabel">Wartość (mm)</label>
+      <input type="number" id="dimEditorInput" min="1" max="999">
+      <select id="dimEditorSelect" hidden>
+        <option value="10">10°</option>
+        <option value="15">15°</option>
+      </select>
+      <div class="dim-editor-r-actions">
+        <button type="button" id="dimEditorCancel">Anuluj</button>
+        <button type="button" id="dimEditorOk">OK</button>
+      </div>
+    </div>
+    </div> <!-- close right-panel -->
+</div> <!-- close container -->
+
+<script>
+const SVG_NS = 'http://www.w3.org/2000/svg';
+function updateViewBox(svgId, padding = 20) {
+    const svg = document.getElementById(svgId);
+    const bbox = svg.getBBox();
+    const viewBox = `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + padding * 2} ${bbox.height + padding * 2}`;
+    svg.setAttribute('viewBox', viewBox);
+}
+
+function calc() {
+    const R        = parseFloat(document.getElementById("lenR").value);
+    const T        = parseFloat(document.getElementById("T").value);
+    const skin     = parseFloat(document.getElementById("skin").value);
+    const alphaDeg = parseFloat(document.getElementById("angle").value);
+    const bendDeg  = parseFloat(document.getElementById("bend").value);
+    const leftFlatMM  = parseFloat(document.getElementById("leftFlat").value);
+    const rightFlatMM = parseFloat(document.getElementById("rightFlat").value);
+
+    const out = document.getElementById("out");
+    const svg = document.getElementById("svg");
+    const svgBent = document.getElementById("svgBent");
+
+    // --- GEOMETRIA ---
+    const alpha = alphaDeg * Math.PI / 180;
+    const bend  = bendDeg  * Math.PI / 180;
+
+    const h = skin;
+
+    const kerfWidth = 2 * h * Math.tan(alpha / 2);
+
+    const thetaKerfDeg = alphaDeg;
+
+    const n = Math.max(1, Math.ceil(bendDeg / thetaKerfDeg));
+
+    const arcLen = R * bend;
+
+    const spacing = arcLen / n;
+    const innerArcLen = (R - T) * bend;
+    const spacingInner = innerArcLen / n;
+
+    let resultsHTML = `
+        <div class="result-item"><span class="result-label">Głębokość frezowania</span><span class="result-value">${skin.toFixed(2)} mm</span></div>
+        <div class="result-item"><span class="result-label">Szerokość nacięcia</span><span class="result-value">${kerfWidth.toFixed(2)} mm</span></div>
+        <div class="result-item"><span class="result-label">Odcinek zewnętrzny</span><span class="result-value">${spacing.toFixed(2)} mm</span></div>
+        <div class="result-item"><span class="result-label">Odcinek wewnętrzny</span><span class="result-value">${spacingInner.toFixed(2)} mm</span></div>
+        <div class="result-item"><span class="result-label">Liczba rowków V</span><span class="result-value">${n}</span></div>
+    `;
+
+    if (R < 2*T) {
+        resultsHTML += `<div class="warning">Promień łuku R musi być większy lub równy 2× grubości MDF (2×${T}=${2*T}mm)</div>`;
+    }
+
+    out.innerHTML = resultsHTML;
+
+    // --- RYSOWANIE 1: PRZEKRÓJ NA PŁASKO ---
+    svg.innerHTML = "";
+
+    function cLine(x1, y1, x2, y2, color) {
+      var el = document.createElementNS(SVG_NS, 'line');
+      el.setAttribute('x1', x1); el.setAttribute('y1', y1);
+      el.setAttribute('x2', x2); el.setAttribute('y2', y2);
+      el.setAttribute('stroke', color); el.setAttribute('stroke-width', '0.8');
+      return el;
+    }
+    const svgWidth = 650;
+    const baseY    = 165;
+
+    const grooveTopWidthMM = Math.max(1, kerfWidth);
+    const bridgeBetweenGroovesMM = spacingInner;
+    const bridgeCount = n + 1;
+    const grooveCount = n;
+    const grooveZoneMM = grooveCount * grooveTopWidthMM + bridgeCount * bridgeBetweenGroovesMM;
+    const totalMM = leftFlatMM + grooveZoneMM + rightFlatMM;
+    const scaleX  = (svgWidth - 60) / totalMM;
+    const scaleY  = 4.5;
+
+    const topY    = baseY - T * scaleY;
+    const valleyY = baseY - (T - h) * scaleY;
+
+    let points = "";
+
+    let x = 30;
+    points += `${x},${baseY} `;
+    points += `${x},${topY} `;
+
+    x += leftFlatMM * scaleX;
+    points += `${x},${topY} `;
+
+    const grooveTopWidthPX = grooveTopWidthMM * scaleX;
+    const bridgeBetweenGroovesPX = bridgeBetweenGroovesMM * scaleX;
+
+    for (let i = 0; i < n; i++) {
+        x += bridgeBetweenGroovesPX;
+        points += `${x},${topY} `;
+
+        const valleyX = x + grooveTopWidthPX / 2;
+        const nextTopX = x + grooveTopWidthPX;
+        points += `${valleyX},${valleyY} ${nextTopX},${topY} `;
+
+        const segmentStartX = x;
+        x = nextTopX;
+
+        if (i >= 1) {
+            const segmentCenterX = segmentStartX - bridgeBetweenGroovesPX/2;
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", segmentCenterX);
+            text.setAttribute("y", topY - 8);
+            text.setAttribute("fill", "#667eea");
+            text.setAttribute("font-size", "9");
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("font-weight", "bold");
+            text.textContent = i;
+            svg.appendChild(text);
+
+            if (i === 1 || i === 3) {
+                var dimY = topY - 45;
+                if (i === 1) {
+                    var grLeft = segmentStartX - bridgeBetweenGroovesPX;
+                    var grRight = segmentStartX;
+                    svg.appendChild(cLine(grLeft, topY, grLeft, dimY, "#667eea"));
+                    svg.appendChild(cLine(grRight, topY, grRight, dimY, "#667eea"));
+                    svg.appendChild(cLine(grLeft, dimY, grRight, dimY, "#667eea"));
+                } else {
+                    var sgLeft = segmentStartX - bridgeBetweenGroovesPX - grooveTopWidthPX;
+                    var sgRight = segmentStartX - bridgeBetweenGroovesPX;
+                    svg.appendChild(cLine(sgLeft, topY, sgLeft, dimY, "#a0a0ff"));
+                    svg.appendChild(cLine(sgRight, topY, sgRight, dimY, "#a0a0ff"));
+                    svg.appendChild(cLine(sgLeft, dimY, sgRight, dimY, "#a0a0ff"));
+                }
+            }
+        }
+    }
+
+    x += bridgeBetweenGroovesPX;
+    points += `${x},${topY} `;
+
+    x += rightFlatMM * scaleX;
+    points += `${x},${topY} `;
+
+    points += `${x},${baseY} `;
+
+    points += `${30},${baseY}`;
+
+    const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    poly.setAttribute("points", points.trim());
+    poly.setAttribute("fill", "#2a3a5a");
+    poly.setAttribute("stroke", "none");
+    svg.appendChild(poly);
+
+    // --- RYSOWANIE 2: TRZY ODDZIELNE KAWAŁKI MDF ---
+    svgBent.innerHTML = "";
+
+    const b_startX = 50;
+    const b_startY = 350;
+    const b_scale = 2;
+
+    const rect1 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect1.setAttribute("x", b_startX);
+    rect1.setAttribute("y", b_startY);
+    rect1.setAttribute("width", leftFlatMM * b_scale);
+    rect1.setAttribute("height", T * b_scale);
+    rect1.setAttribute("fill", "#2a3a5a");
+    rect1.setAttribute("stroke", "none");
+    svgBent.appendChild(rect1);
+
+    const pointA_x = b_startX + leftFlatMM * b_scale;
+    const pointA_y = b_startY;
+
+    const pointB_x = b_startX + leftFlatMM * b_scale;
+    const pointB_y = b_startY + T * b_scale;
+
+    const pointC_x = b_startX + leftFlatMM * b_scale + R * b_scale - T * b_scale;
+    const pointC_y = b_startY - R * b_scale + T * b_scale;
+
+    const pointD_x = b_startX + leftFlatMM * b_scale + R * b_scale - T * b_scale;
+    const pointD_y = b_startY - R * b_scale - rightFlatMM * b_scale + T * b_scale;
+
+    const pointE_x = b_startX + leftFlatMM * b_scale + R * b_scale;
+    const pointE_y = b_startY - R * b_scale + T * b_scale;
+
+    const pointF_x = b_startX + leftFlatMM * b_scale + R * b_scale;
+    const pointF_y = b_startY - R * b_scale - rightFlatMM * b_scale + T * b_scale;
+
+    const pointW_x = b_startX + leftFlatMM * b_scale + R * b_scale;
+    const pointW_y = b_startY + T * b_scale;
+
+    const pointP_x = pointW_x - R * b_scale;
+    const pointP_y = pointW_y - R * b_scale;
+
+    let arcPath = `M ${pointB_x},${pointB_y} `;
+    arcPath += `A ${R * b_scale},${R * b_scale} 0 0 0 ${pointE_x},${pointE_y}`;
+
+    const arcShape = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    arcShape.setAttribute("d", arcPath);
+    arcShape.setAttribute("fill", "none");
+    arcShape.setAttribute("stroke", "blue");
+    arcShape.setAttribute("stroke-width", "0.7");
+    arcShape.setAttribute("opacity", "0.28");
+    arcShape.setAttribute("stroke-dasharray", "5,5");
+    svgBent.appendChild(arcShape);
+
+    let arcPath2 = `M ${pointA_x},${pointA_y} `;
+    arcPath2 += `A ${(R - T) * b_scale},${(R - T) * b_scale} 0 0 0 ${pointC_x},${pointC_y}`;
+
+    const arcShape2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    arcShape2.setAttribute("d", arcPath2);
+    arcShape2.setAttribute("fill", "none");
+    arcShape2.setAttribute("stroke", "red");
+    arcShape2.setAttribute("stroke-width", "0.7");
+    arcShape2.setAttribute("opacity", "0.28");
+    arcShape2.setAttribute("stroke-dasharray", "5,5");
+    svgBent.appendChild(arcShape2);
+
+    const startAngleInner = Math.atan2(pointA_y - pointP_y, pointA_x - pointP_x);
+    const endAngleInner = Math.atan2(pointC_y - pointP_y, pointC_x - pointP_x);
+    const radiusPA = Math.hypot(pointA_x - pointP_x, pointA_y - pointP_y);
+    const radiusPC = Math.hypot(pointC_x - pointP_x, pointC_y - pointP_y);
+    const nSegmentsInner = n - 1;
+
+    for (let i = 0; i < nSegmentsInner; i++) {
+        const a1 = startAngleInner + (endAngleInner - startAngleInner) * (i / nSegmentsInner);
+        const a2 = startAngleInner + (endAngleInner - startAngleInner) * ((i + 1) / nSegmentsInner);
+        const r1 = radiusPA + (radiusPC - radiusPA) * (i / nSegmentsInner);
+        const r2 = radiusPA + (radiusPC - radiusPA) * ((i + 1) / nSegmentsInner);
+
+        let x1 = pointP_x + r1 * Math.cos(a1);
+        let y1 = pointP_y + r1 * Math.sin(a1);
+        let x2 = pointP_x + r2 * Math.cos(a2);
+        let y2 = pointP_y + r2 * Math.sin(a2);
+
+        if (i === 0) {
+            x1 = pointA_x;
+            y1 = pointA_y;
+        }
+        if (i === nSegmentsInner - 1) {
+            x2 = pointC_x;
+            y2 = pointC_y;
+        }
+
+        const segInner = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        segInner.setAttribute("x1", x1);
+        segInner.setAttribute("y1", y1);
+        segInner.setAttribute("x2", x2);
+        segInner.setAttribute("y2", y2);
+        segInner.setAttribute("stroke", "#8b5a2b");
+        segInner.setAttribute("stroke-width", "2");
+        svgBent.appendChild(segInner);
+
+        // Dodaj numer segmentu brązowego
+        const brownText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        brownText.setAttribute("x", (x1 + x2) / 2 - 8);
+        brownText.setAttribute("y", (y1 + y2) / 2);
+        brownText.setAttribute("fill", "#8b5a2b");
+        brownText.setAttribute("font-size", "10");
+        brownText.setAttribute("text-anchor", "middle");
+        brownText.setAttribute("font-weight", "bold");
+        brownText.textContent = i + 1;
+        svgBent.appendChild(brownText);
+    }
+
+    const startAngle = Math.atan2(pointB_y - pointP_y, pointB_x - pointP_x);
+    const endAngle = Math.atan2(pointE_y - pointP_y, pointE_x - pointP_x);
+    const radiusPB = Math.hypot(pointB_x - pointP_x, pointB_y - pointP_y);
+    const radiusPE = Math.hypot(pointE_x - pointP_x, pointE_y - pointP_y);
+    const nSegments = n - 1;
+
+    for (let i = 0; i < nSegments; i++) {
+        const a1 = startAngle + (endAngle - startAngle) * (i / nSegments);
+        const a2 = startAngle + (endAngle - startAngle) * ((i + 1) / nSegments);
+        const r1 = radiusPB + (radiusPE - radiusPB) * (i / nSegments);
+        const r2 = radiusPB + (radiusPE - radiusPB) * ((i + 1) / nSegments);
+
+        let x1 = pointP_x + r1 * Math.cos(a1);
+        let y1 = pointP_y + r1 * Math.sin(a1);
+        let x2 = pointP_x + r2 * Math.cos(a2);
+        let y2 = pointP_y + r2 * Math.sin(a2);
+
+        if (i === 0) {
+            x1 = pointB_x;
+            y1 = pointB_y;
+        }
+        if (i === nSegments - 1) {
+            x2 = pointE_x;
+            y2 = pointE_y;
+        }
+
+        const seg = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        seg.setAttribute("x1", x1);
+        seg.setAttribute("y1", y1);
+        seg.setAttribute("x2", x2);
+        seg.setAttribute("y2", y2);
+        seg.setAttribute("stroke", "#8b5a2b");
+        seg.setAttribute("stroke-width", "2");
+        svgBent.appendChild(seg);
+    }
+
+    const cornerPoints = [
+        {x: pointP_x, y: pointP_y, label: "P", color: "red"}
+    ];
+
+    cornerPoints.forEach(point => {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", point.x);
+        circle.setAttribute("cy", point.y);
+        circle.setAttribute("r", "4");
+        circle.setAttribute("fill", point.color);
+        svgBent.appendChild(circle);
+        
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", point.x + 6);
+        text.setAttribute("y", point.y - 6);
+        text.setAttribute("fill", point.color);
+        text.setAttribute("font-size", "13");
+        text.setAttribute("font-weight", "bold");
+        text.textContent = point.label;
+        svgBent.appendChild(text);
+    });
+
+    const testSquare = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    testSquare.setAttribute("x", pointW_x - R * b_scale);
+    testSquare.setAttribute("y", pointW_y - R * b_scale);
+    testSquare.setAttribute("width", R * b_scale);
+    testSquare.setAttribute("height", R * b_scale);
+    testSquare.setAttribute("fill", "none");
+    testSquare.setAttribute("stroke", "violet");
+    testSquare.setAttribute("stroke-width", "1.5");
+    testSquare.setAttribute("stroke-dasharray", "12,6");
+    svgBent.appendChild(testSquare);
+
+    function makeDimBadge(cx, cy, label, value, hiddenId, minVal, maxVal, opts) {
+      opts = opts || {};
+      var isSelect = opts.isSelect || false;
+      var svgElId = opts.svgElId || 'svgBent';
+      var options = opts.options || null;
+      var badgeR = opts.badgeR || 22;
+      var g = document.createElementNS(SVG_NS, 'g');
+      g.setAttribute('class', 'dim-editable-r');
+      g.setAttribute('role', 'button');
+      g.setAttribute('tabindex', '0');
+      var sw = Math.max(0.8, Math.round(badgeR / 18 * 10) / 10);
+      var cir = document.createElementNS(SVG_NS, 'circle');
+      cir.setAttribute('cx', cx); cir.setAttribute('cy', cy);
+      cir.setAttribute('r', String(badgeR));
+      cir.setAttribute('stroke-width', String(sw));
+      g.appendChild(cir);
+      var txt = document.createElementNS(SVG_NS, 'text');
+      txt.setAttribute('x', cx); txt.setAttribute('y', cy + 1);
+      txt.setAttribute('font-size', '13');
+      txt.setAttribute('font-weight', '800');
+      txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('dominant-baseline', 'middle');
+      txt.textContent = Math.round(value);
+      g.appendChild(txt);
+      g.addEventListener('pointerdown', function(e) {
+        e.preventDefault(); e.stopPropagation();
+        var editor = document.getElementById('dimEditor');
+        var input = document.getElementById('dimEditorInput');
+        var select = document.getElementById('dimEditorSelect');
+        var labelEl = document.getElementById('dimEditorLabel');
+        if (isSelect) {
+          input.hidden = true; select.hidden = false;
+          select.innerHTML = '';
+          options.forEach(function(o) {
+            var opt = document.createElement('option');
+            opt.value = o; opt.textContent = o + '\u00B0';
+            if (String(o) === String(value)) opt.selected = true;
+            select.appendChild(opt);
+          });
+          labelEl.textContent = label;
+        } else {
+          select.hidden = true; input.hidden = false;
+          labelEl.textContent = label + ' (mm)';
+          input.value = Math.round(value);
+        }
+        editor.hidden = false;
+        var svgEl = document.getElementById(svgElId);
+        var panel = svgEl.closest('.right-panel');
+        var pr = panel.getBoundingClientRect();
+        var pt = svgEl.createSVGPoint();
+        pt.x = cx; pt.y = cy;
+        var scr = pt.matrixTransform(svgEl.getScreenCTM());
+        var left = scr.x - pr.left;
+        var top = scr.y - pr.top - 46;
+        left = Math.max(8, Math.min(left, pr.width - 170));
+        editor.style.left = left + 'px';
+        editor.style.top = top + 'px';
+        if (isSelect) { select.focus(); } else { input.focus(); input.select(); }
+        window._dimCommit = function() {
+          if (isSelect) {
+            var v = select.value;
+            document.getElementById(hiddenId).value = v;
+            editor.hidden = true;
+            calc();
+          } else {
+            var v = parseFloat(input.value);
+            if (!isNaN(v) && v >= minVal && v <= maxVal) {
+              document.getElementById(hiddenId).value = String(Math.round(v));
+              editor.hidden = true;
+              calc();
+            } else { input.focus(); }
+          }
+        };
+        window._dimCancel = function() { editor.hidden = true; };
+      });
+      return g;
+    }
+
+    // Green editable circle for R
+    var rCx = pointW_x - (R * b_scale) / 2, rCy = pointW_y + 22;
+    svgBent.appendChild(makeDimBadge(rCx, rCy, 'R', R, 'lenR', 10, 500));
+
+    // Green editable circle for T on rect1
+    var tCx = b_startX + (leftFlatMM * b_scale) / 2;
+    var tCy = b_startY + (T * b_scale) / 2;
+    svgBent.appendChild(makeDimBadge(tCx, tCy, 'T', T, 'T', 3, 50));
+
+    // White result badge helper
+    function addWhiteBadge(cx, cy, val) {
+      var g = document.createElementNS(SVG_NS, 'g');
+      var c = document.createElementNS(SVG_NS, 'circle');
+      c.setAttribute('cx', cx); c.setAttribute('cy', cy);
+      c.setAttribute('r', 16);
+      c.setAttribute('fill', '#fff');
+      c.setAttribute('stroke', '#C4BFB6');
+      c.setAttribute('stroke-width', '2.5');
+      g.appendChild(c);
+      var t = document.createElementNS(SVG_NS, 'text');
+      t.setAttribute('x', cx); t.setAttribute('y', cy);
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('dominant-baseline', 'middle');
+      t.setAttribute('font-family', 'sans-serif');
+      var n = document.createElementNS(SVG_NS, 'tspan');
+      n.setAttribute('x', cx); n.setAttribute('dy', '-4');
+      n.setAttribute('font-size', '14'); n.setAttribute('font-weight', '700');
+      n.setAttribute('fill', '#3D3A36');
+      n.textContent = val.toFixed(1);
+      t.appendChild(n);
+      var u = document.createElementNS(SVG_NS, 'tspan');
+      u.setAttribute('x', cx); u.setAttribute('dy', '11');
+      u.setAttribute('font-size', '10'); u.setAttribute('font-weight', '400');
+      u.setAttribute('fill', '#6B6660');
+      u.textContent = 'mm';
+      t.appendChild(u);
+      g.appendChild(t);
+      svg.appendChild(g);
+    }
+
+    // Green editable rect for angle on flat SVG (like rogowa type selector)
+    var aVal = parseInt(document.getElementById('angle').value);
+    var aCx = 40;
+    var aCy = topY - 50;
+    (function() {
+      var g = document.createElementNS(SVG_NS, 'g');
+      g.setAttribute('class', 'dim-editable-rect');
+      g.setAttribute('role', 'button'); g.setAttribute('tabindex', '0');
+      var hit = document.createElementNS(SVG_NS, 'rect');
+      hit.setAttribute('class', 'dim-hit');
+      hit.setAttribute('x', aCx - 50); hit.setAttribute('y', aCy - 14);
+      hit.setAttribute('width', '100'); hit.setAttribute('height', '28');
+      hit.setAttribute('rx', '5'); hit.setAttribute('ry', '5');
+      g.appendChild(hit);
+      var txt = document.createElementNS(SVG_NS, 'text');
+      txt.setAttribute('x', aCx); txt.setAttribute('y', aCy + 5);
+      txt.setAttribute('font-size', '14'); txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('dominant-baseline', 'middle');
+      txt.textContent = 'Frez ' + aVal + '\u00B0';
+      g.appendChild(txt);
+      g.addEventListener('pointerdown', function(e) {
+        e.preventDefault(); e.stopPropagation();
+        var editor = document.getElementById('dimEditor');
+        var input = document.getElementById('dimEditorInput');
+        var select = document.getElementById('dimEditorSelect');
+        var labelEl = document.getElementById('dimEditorLabel');
+        input.hidden = true; select.hidden = false;
+        select.innerHTML = '';
+        [10, 15].forEach(function(o) {
+          var opt = document.createElement('option');
+          opt.value = o; opt.textContent = o + '\u00B0';
+          if (o === aVal) opt.selected = true;
+          select.appendChild(opt);
+        });
+        labelEl.textContent = 'K\u0105t freza V';
+        editor.hidden = false;
+        var panel = svg.closest('.right-panel');
+        var pr = panel.getBoundingClientRect();
+        var pt = svg.createSVGPoint(); pt.x = aCx; pt.y = aCy;
+        var scr = pt.matrixTransform(svg.getScreenCTM());
+        var left = scr.x - pr.left - 50;
+        var top = scr.y - pr.top - 50;
+        left = Math.max(8, Math.min(left, pr.width - 170));
+        editor.style.left = left + 'px'; editor.style.top = top + 'px';
+        select.focus();
+        window._dimCommit = function() {
+          document.getElementById('angle').value = select.value;
+          editor.hidden = true; calc();
+        };
+        window._dimCancel = function() { editor.hidden = true; };
+      });
+      svg.appendChild(g);
+    })();
+
+    // White result circles – positioned above their corresponding dim lines
+    (function() {
+      // Bridge dim center: grooveStartX + (grooveEndX - grooveStartX)/2 at i=1
+      var x1 = 30 + leftFlatMM * scaleX + bridgeBetweenGroovesPX; // after first x+=bridge
+      x1 += grooveTopWidthPX; // after nextTopX, x = x + grooveTopWidthPX
+      x1 += bridgeBetweenGroovesPX; // at start of i=1, x += bridge
+      var segStart1 = x1;
+      var bx = segStart1 - bridgeBetweenGroovesPX / 2; // center of bridge 0-1
+
+      // Kerf dim center: groove at i=3
+      var x3 = 30 + leftFlatMM * scaleX;
+      for (var ii = 0; ii <= 3; ii++) {
+        x3 += bridgeBetweenGroovesPX;
+        if (ii === 3) break;
+        x3 += grooveTopWidthPX;
+      }
+      var segStart3 = x3;
+      var kx = segStart3 - bridgeBetweenGroovesPX - grooveTopWidthPX / 2; // center of groove 2
+
+      var dimY = topY - 45;
+      addWhiteBadge(bx, dimY - 26, spacingInner);
+      addWhiteBadge(kx, dimY - 26, grooveTopWidthMM);
+    })();
+
+    // One depth dimension line (h) at last groove on right side, with green circle
+    if (n >= 1) {
+      var lastIdx = n - 1;
+      var gStart = 30 + leftFlatMM * scaleX + lastIdx * (bridgeBetweenGroovesPX + grooveTopWidthPX) + bridgeBetweenGroovesPX;
+      var valleyPosX = gStart + grooveTopWidthPX / 2;
+      var extX = valleyPosX + 16;
+      var dimY = (topY + valleyY) / 2;
+      var line = document.createElementNS(SVG_NS, 'line');
+      line.setAttribute('x1', extX); line.setAttribute('y1', topY - 1);
+      line.setAttribute('x2', extX); line.setAttribute('y2', valleyY + 1);
+      line.setAttribute('stroke', '#667eea'); line.setAttribute('stroke-width', '0.8');
+      svg.appendChild(line);
+      var tickT = document.createElementNS(SVG_NS, 'line');
+      tickT.setAttribute('x1', extX - 4); tickT.setAttribute('y1', topY - 1);
+      tickT.setAttribute('x2', extX + 4); tickT.setAttribute('y2', topY - 1);
+      tickT.setAttribute('stroke', '#667eea'); tickT.setAttribute('stroke-width', '0.8');
+      svg.appendChild(tickT);
+      var tickB = document.createElementNS(SVG_NS, 'line');
+      tickB.setAttribute('x1', extX - 4); tickB.setAttribute('y1', valleyY + 1);
+      tickB.setAttribute('x2', extX + 4); tickB.setAttribute('y2', valleyY + 1);
+      tickB.setAttribute('stroke', '#667eea'); tickB.setAttribute('stroke-width', '0.8');
+      svg.appendChild(tickB);
+      // Green circle for h value
+      var hCx = extX + 22, hCy = dimY;
+      svg.appendChild(makeDimBadge(hCx, hCy, 'h', h, 'skin', 1, 40, { svgElId: 'svg', badgeR: 18 }));
+    }
+
+    const rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect2.setAttribute("x", pointD_x);
+    rect2.setAttribute("y", pointP_y - rightFlatMM * b_scale);
+    rect2.setAttribute("width", T * b_scale);
+    rect2.setAttribute("height", rightFlatMM * b_scale);
+    rect2.setAttribute("fill", "#2a3a5a");
+    rect2.setAttribute("stroke", "none");
+    svgBent.appendChild(rect2);
+    
+    // Zaktualizuj viewBox dla obu SVG po narysowaniu
+    setTimeout(() => {
+        updateViewBox('svg', 30);
+        updateViewBox('svgBent', 30);
+    }, 10);
+}
+
+calc();
+
+// Dodaj nasłuchiwanie na zmianę rozmiaru okna
+window.addEventListener('resize', () => {
+    setTimeout(() => {
+        updateViewBox('svg', 30);
+        updateViewBox('svgBent', 30);
+    }, 100);
+});
+
+document.getElementById('dimEditorOk').addEventListener('click', function() {
+    if (window._dimCommit) window._dimCommit();
+});
+document.getElementById('dimEditorCancel').addEventListener('click', function() {
+    if (window._dimCancel) window._dimCancel();
+});
+function dimEditorKeydown(e) {
+    if (e.key === 'Enter' && window._dimCommit) { window._dimCommit(); }
+    if (e.key === 'Escape' && window._dimCancel) { window._dimCancel(); }
+}
+document.getElementById('dimEditorInput').addEventListener('keydown', dimEditorKeydown);
+document.getElementById('dimEditorSelect').addEventListener('keydown', dimEditorKeydown);
+</script>
+<script>if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js')}</script>
+
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stolarnia PRO — Harmonogram</title>
+    <style>
+        :root {
+            --bg-dark: #09090c; --bg-grid: #1c1c26; --node-bg: #16171f; --node-border: #42465e;
+            --ruler-color: #383a4d; --text-main: #ffffff; --text-muted: #6e7087; 
+            --accent-blue: #2575fc; --accent-orange: #ff9100; --accent-green: #00e676; 
+            --wire-color: #8c8fbd; --day-height: 24px;
+        }
+
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-dark); color: var(--text-main); overflow: hidden; user-select: none; }
+
+        .controls { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: rgba(18, 19, 26, 0.95); backdrop-filter: blur(10px); padding: 12px 20px; border-radius: 12px; border: 1px solid var(--node-border); display: flex; gap: 12px; align-items: center; z-index: 1000; box-shadow: 0 15px 40px rgba(0,0,0,0.9); flex-wrap: wrap; justify-content: center; width: auto; max-width: 90%; }
+        .controls.embed-top { top: 8px; }
+        .controls button { background: var(--accent-blue); color: white; padding: 10px 20px; font-weight: bold; cursor: pointer; border: none; border-radius: 6px; transition: 0.2s; box-shadow: 0 4px 15px rgba(37, 117, 252, 0.4); font-size: 14px;}
+        .controls button:hover { filter: brightness(1.3); transform: translateY(-1px);}
+
+        .viewport { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: grab; }
+        .viewport:active { cursor: grabbing; }
+        .canvas { position: absolute; transform-origin: 0 0; width: 10000px; height: 10000px; background-image: linear-gradient(to right, var(--bg-grid) 1px, transparent 1px), linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px); background-size: 40px 40px; will-change: transform; }
+        
+        #cables-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        path.cable { fill: none; stroke-width: 4px; }
+        path.cable-main { stroke: var(--wire-color); } path.cable-loop { stroke-dasharray: 6; opacity: 0.9; }
+        
+        .timeline-ruler { position: absolute; left: 5000px; top: 0; width: 2px; height: 100%; background: var(--ruler-color); z-index: 5; }
+        
+        .tick { position: absolute; left: -10px; width: 22px; height: 1px; background: var(--ruler-color); display: flex; align-items: center; will-change: width, transform, opacity;}
+        .tick.month { background: var(--text-main); height: 2px;}
+        .tick.saturday { background: #1c8cff; height: 2px; box-shadow: 0 0 10px #1c8cff; z-index: 6;}
+        .tick.sunday { background: #ff3333; height: 2px; box-shadow: 0 0 10px #ff3333; z-index: 6;}
+        .tick.today { background: var(--accent-orange); height: 3px; box-shadow: 0 0 15px var(--accent-orange); z-index: 7;}
+        
+        .tick-label { position: absolute; right: 100%; margin-right: 12px; font-size: 10px; font-weight: bold; color: var(--text-muted); white-space: nowrap; transform-origin: right center; will-change: transform, opacity, filter; transition: opacity 0.1s, filter 0.1s;}
+        .tick.month .tick-label { color: #ffffff; font-size: 12px;}
+        .tick.saturday .tick-label { color: #5ca4ff; }
+        .tick.sunday .tick-label { color: #ff6666; }
+        .tick.today .tick-label { color: var(--accent-orange); font-size: 13px; text-transform: uppercase; }
+        
+        .schedule-group { position: absolute; width: 16px; cursor: ns-resize; z-index: 15; }
+        .schedule-segment { position: absolute; width: 100%; border-radius: 6px; border: 1px solid rgba(255,255,255,0.6); transition: left 0.3s ease; }
+        
+        .port-in { position: absolute; top: 5px; width: 12px; height: 12px; background: var(--bg-dark); border-radius: 50%; border: 3px solid; transition: left 0.2s, right 0.2s;}
+        .port-in-left { left: -9px; right: auto; }
+        .port-in-right { right: -9px; left: auto; }
+
+        .node { position: absolute; background: var(--node-bg); border: 1px solid var(--node-border); border-radius: 12px; width: 380px; box-shadow: 0 15px 35px rgba(0,0,0,0.8); z-index: 20; cursor: move; display: flex; flex-direction: column; }
+        .node.dragging { z-index: 100; box-shadow: 0 25px 50px rgba(0,0,0,0.95); border-color: #6a6e94;}
+        .node-header { padding: 12px 15px; border-bottom: 1px solid var(--node-border); display: flex; justify-content: space-between; align-items: center; border-radius: 12px 12px 0 0;}
+        
+        /* Styl dla inputów wewnątrz node'a */
+        .node-input-title { background: transparent; border: none; color: var(--text-main); font-size: 15px; font-weight: bold; outline: none; flex: 1; margin-right: 10px; font-family: 'Segoe UI', sans-serif; border-bottom: 1px solid transparent; padding-bottom: 2px;}
+        .node-input-title::placeholder { color: rgba(255, 255, 255, 0.3); }
+        .node-input-title:focus { border-bottom: 1px solid var(--accent-blue); }
+        
+        .node-input { background: #0a0a0d; border: 1px solid var(--node-border); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 12px; outline: none; font-family: 'Segoe UI', sans-serif; transition: 0.2s; width: 100%; box-sizing: border-box;}
+        .node-input::placeholder { color: #5a5c70; }
+        .node-input:focus { border-color: var(--accent-blue); background: #0c0d12;}
+        
+        .node-date-info { display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.4); padding: 3px 6px; border-radius: 6px; font-size: 12px; color: #a1a3b1; flex-shrink: 0;}
+        .inline-date, .inline-days { background: transparent; border: 1px solid transparent; color: #ffffff; font-size: 11px; font-weight: bold; outline: none; cursor: pointer; text-align: center; border-radius: 4px; transition: 0.2s; font-family: 'Segoe UI', sans-serif;}
+        .inline-date { width: 95px; padding: 2px; color-scheme: dark;}
+        .inline-days { width: 32px; padding: 2px;}
+        .inline-days::-webkit-outer-spin-button, .inline-days::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .inline-date:hover, .inline-days:hover { background: #262836; border-color: var(--node-border); }
+        .inline-date:focus, .inline-days:focus { background: #0a0a0d; border-color: var(--accent-blue); cursor: text;}
+
+        .node-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .data-row { display: flex; gap: 8px; }
+        
+        .action-row { display: flex; gap: 6px; }
+        .action-btn { flex: 1; text-decoration: none; background: #0c0d12; border: 1px solid var(--node-border); color: var(--text-main); padding: 8px 5px; border-radius: 8px; font-size: 11px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; transition: 0.2s; font-weight: bold;}
+        .action-btn:hover { background: #262836; transform: translateY(-1px); }
+        .btn-call { color: var(--accent-green); } 
+        .btn-pin { color: var(--accent-orange); }
+        .btn-nav { color: var(--accent-blue); }
+
+        .tasks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .task-btn { background: #0c0d12; border: 1px solid var(--node-border); color: #8c8d93; padding: 10px 5px; border-radius: 8px; font-size: 11px; text-align: center; cursor: pointer; transition: 0.2s; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;}
+        .task-btn:hover { background: #262836; color: white;}
+
+        .messenger-module { background: #0c0d12; border: 1px solid var(--node-border); border-radius: 8px; display: flex; flex-direction: column; height: 150px; overflow: hidden; }
+        .msg-header { background: #1c1c26; padding: 8px 10px; font-size: 11px; font-weight: bold; color: var(--text-muted); border-bottom: 1px solid var(--node-border); display: flex; justify-content: space-between;}
+        .msg-history { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .msg-bubble { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 12px; line-height: 1.4; word-wrap: break-word; }
+        .msg-sent { background: var(--accent-blue); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg-received { background: #262836; color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg-input-area { display: flex; border-top: 1px solid var(--node-border); background: #16171f;}
+        .msg-input-area input { flex: 1; background: transparent; border: none; padding: 10px; color: white; font-size: 12px; outline: none; }
+        .msg-input-area button { background: var(--accent-blue); color: white; border: none; padding: 0 15px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+        .msg-input-area button:hover { filter: brightness(1.2); }
+
+        .port-out { position: absolute; top: 15px; width: 14px; height: 14px; background: var(--bg-dark); border-radius: 50%; border: 3px solid; cursor: crosshair; z-index: 5; transition: left 0.2s, right 0.2s;}
+        .port-right { right: -9px; left: auto; }
+        .port-left { left: -9px; right: auto; }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button onclick="utworzWezel()">➕ Dodaj</button>
+        <button onclick="skupNaDzisiaj()" style="background:var(--accent-orange); box-shadow: 0 4px 15px rgba(255, 145, 0, 0.4);">🎯 Dzisiaj</button>
+    </div>
+
+    <div class="viewport" id="viewport">
+        <div class="canvas" id="canvas">
+            <svg id="cables-layer"></svg>
+            <div class="timeline-ruler" id="ruler"></div>
+            <div id="elements-container"></div>
+        </div>
+    </div>
+
+    <script>
+        if (new URLSearchParams(location.search).get('embed') === '1') {
+            document.querySelector('.controls').classList.add('embed-top');
+        }
+
+        const colors =['#00e676', '#ff1744', '#2979ff', '#ffea00', '#d500f9', '#18ffff', '#ff9100', '#f50057', '#76ff03'];
+        let colorIndex = 0; 
+
+        const viewport = document.getElementById('viewport'); const canvas = document.getElementById('canvas');
+        let transform = { x: 0, y: 0, scale: 1 }; let isPanning = false; let startPan = { x: 0, y: 0 };
+        
+        function updateTransform() { 
+            canvas.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`; aktualizujLupę(); 
+        }
+        
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault(); const delta = -e.deltaY * 0.0015; let newScale = Math.min(Math.max(0.3, transform.scale * (1 + delta)), 3);
+            const rect = viewport.getBoundingClientRect();
+            transform.x = (e.clientX - rect.left) - ((e.clientX - rect.left) - transform.x) * (newScale / transform.scale);
+            transform.y = (e.clientY - rect.top) - ((e.clientY - rect.top) - transform.y) * (newScale / transform.scale);
+            transform.scale = newScale; updateTransform(); rysujWszystkieKable();
+        }, { passive: false });
+
+        viewport.addEventListener('mousedown', (e) => {
+            if (e.button === 1 || e.target === viewport || e.target === canvas) { isPanning = true; startPan = { x: e.clientX - transform.x, y: e.clientY - transform.y }; viewport.style.cursor = 'grabbing'; }
+        });
+        window.addEventListener('mousemove', (e) => { if (!isPanning) return; transform.x = e.clientX - startPan.x; transform.y = e.clientY - startPan.y; updateTransform(); });
+        window.addEventListener('mouseup', () => { isPanning = false; viewport.style.cursor = 'grab'; });
+
+        const dayHeight = 24; const year = 2026; const totalDays = 365; const canvasCenterY = 5000;
+        let today = new Date(); today.setHours(0,0,0,0);
+        
+        function dateToY(dateObj) { const startYear = new Date(year, 0, 1); return canvasCenterY - (Math.floor((dateObj.getTime() - startYear.getTime()) / (1000 * 3600 * 24)) * dayHeight); }
+        function toYYYYMMDD(d) { const z = n => ('0' + n).slice(-2); return d.getFullYear() + '-' + z(d.getMonth()+1) + '-' + z(d.getDate()); }
+
+        let ticksData =[]; 
+
+        function generujLinijke() {
+            const ruler = document.getElementById('ruler'); const startYear = new Date(year, 0, 1); const months =['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
+            for(let i=0; i<totalDays; i++) {
+                let d = new Date(startYear); d.setDate(d.getDate() + i);
+                const y = dateToY(d); const dayOfWeek = d.getDay(); const isFirst = d.getDate() === 1; const isToday = d.getTime() === today.getTime();
+                
+                const tick = document.createElement('div');
+                tick.className = `tick ${isFirst?'month':''} ${isToday?'today':''} ${dayOfWeek===6?'saturday':''} ${dayOfWeek===0?'sunday':''}`;
+                tick.style.top = `${y}px`;
+                
+                const dd = d.getDate(); const mm = (d.getMonth() + 1).toString().padStart(2, '0'); const dataMala = `${dd}.${mm}`;
+                let label = dataMala;
+                if(isToday) label = `DZISIAJ ${dataMala}`; else if(isFirst) label = `1 ${months[d.getMonth()]}`; else if(dayOfWeek === 6) label = `Sob ${dataMala}`; else if(dayOfWeek === 0) label = `Ndz ${dataMala}`;
+                
+                let bWidth = 22; if(isToday) bWidth = 50; else if(dayOfWeek===6 || dayOfWeek===0) bWidth = 40; else if(isFirst) bWidth = 35;
+                if(label) tick.innerHTML = `<div class="tick-label">${label}</div>`; ruler.appendChild(tick);
+                ticksData.push({ el: tick, labelEl: tick.querySelector('.tick-label'), y: y, baseWidth: bWidth });
+            }
+        }
+
+        function aktualizujLupę() {
+            const centerY = (window.innerHeight / 2 - transform.y) / transform.scale;
+            const maxDist = 350 / transform.scale; 
+
+            for(let i=0; i<ticksData.length; i++) {
+                const t = ticksData[i]; const dist = Math.abs(t.y - centerY);
+                if(dist < maxDist) {
+                    const factor = 1 + 0.8 * (1 - dist / maxDist); 
+                    t.el.style.width = `${t.baseWidth * factor}px`;
+                    if(t.labelEl) {
+                        t.labelEl.style.transform = `scale(${factor})`;
+                        t.labelEl.style.opacity = 0.2 + 0.8 * (1 - dist / maxDist);
+                        if(factor > 1.5) t.labelEl.style.filter = "brightness(1.5) drop-shadow(0 0 8px rgba(255,255,255,0.6))";
+                        else t.labelEl.style.filter = "none";
+                    }
+                } else {
+                    t.el.style.width = `${t.baseWidth}px`;
+                    if(t.labelEl) { t.labelEl.style.transform = `scale(1)`; t.labelEl.style.opacity = "0.2"; t.labelEl.style.filter = "none"; }
+                }
+            }
+        }
+
+        function skupNaDzisiaj() { 
+            const isMobile = window.innerWidth < 768;
+            transform.scale = isMobile ? 0.75 : 1; 
+            const offsetLeft = isMobile ? 120 : 300; 
+            transform.x = offsetLeft - (5000 * transform.scale); 
+            const targetY = dateToY(today);
+            transform.y = (window.innerHeight / 2) - (targetY * transform.scale); 
+            updateTransform(); 
+        }
+
+        let connections =[]; let currentId = 0;
+
+        function utworzWezel(initData = null) {
+            // Ustalenie domyślnych danych
+            const nazwa = initData && initData.nazwa ? initData.nazwa : '';
+            const tel = initData && initData.tel ? initData.tel : '';
+            const adres = initData && initData.adres ? initData.adres : '';
+            const workingDays = initData && initData.days ? initData.days : 3;
+            
+            let startDate;
+            if (initData && initData.data) {
+                startDate = new Date(initData.data);
+            } else {
+                startDate = new Date(today);
+                if(startDate.getDay() === 6) startDate.setDate(startDate.getDate() + 2);
+                if(startDate.getDay() === 0) startDate.setDate(startDate.getDate() + 1);
+            }
+            startDate.setHours(0,0,0,0);
+
+            const id = currentId++; const color = colors[colorIndex % colors.length]; colorIndex++;
+
+            const groupEl = document.createElement('div'); groupEl.className = 'schedule-group';
+            document.getElementById('elements-container').appendChild(groupEl);
+
+            const node = document.createElement('div'); node.className = 'node';
+            const nodeX = 5120 + (id % 5) * 50;
+            const portClass = 'port-left'; 
+
+            node.style.borderTopColor = color; node.style.left = `${nodeX}px`; node.style.top = `${dateToY(startDate) - 150}px`;
+            
+            node.innerHTML = `
+                <div class="node-header" style="background: rgba(${hexToRgb(color)}, 0.15);">
+                    <input type="text" id="node-name-${id}" class="node-input-title" placeholder="Nowy Klient / Projekt" value="${nazwa}">
+                    <div class="node-date-info">
+                        <input type="date" class="inline-date" id="inline-date-${id}" value="${toYYYYMMDD(startDate)}" onchange="zaktualizujWezel(${id})">
+                        <span>(</span>
+                        <input type="number" class="inline-days" id="inline-days-${id}" value="${workingDays}" min="1" onchange="zaktualizujWezel(${id})">
+                        <span>dni)</span>
+                    </div>
+                </div>
+                <div class="node-content">
+                    <div class="data-row">
+                        <input type="text" id="node-phone-${id}" class="node-input" placeholder="☎ Nr telefonu" value="${tel}" oninput="zaktualizujAkcje(${id})">
+                        <input type="text" id="node-address-${id}" class="node-input" placeholder="🏠 Adres klienta" value="${adres}" oninput="zaktualizujAkcje(${id})">
+                    </div>
+                    <div class="action-row">
+                        <a id="call-btn-${id}" class="action-btn btn-call">📞 Zadzwoń</a>
+                        <button class="action-btn btn-pin" id="pin-btn-${id}" onclick="pobierzPineske(${id})">📍 Złap GPS</button>
+                        <a id="nav-btn-${id}" class="action-btn btn-nav">🚗 Nawiguj</a>
+                    </div>
+                    <div class="tasks-grid">
+                        <div class="task-btn" onclick="zaznaczZadanie(this)">💰 Zaliczka</div>
+                        <div class="task-btn" onclick="zaznaczZadanie(this)">📐 Projekt</div>
+                        <div class="task-btn" onclick="zaznaczZadanie(this)">🔩 Akcesoria</div>
+                        <div class="task-btn" onclick="zaznaczZadanie(this)">🪵 Płyty</div>
+                    </div>
+                    <div class="messenger-module">
+                        <div class="msg-header">
+                            <span>Wiadomości (Skrzynka)</span>
+                            <span style="color:var(--accent-green)">● Aktywne</span>
+                        </div>
+                        <div class="msg-history" id="chat-${id}">
+                            <div class="msg-bubble msg-received">Dzień dobry, chciałem potwierdzić ustalenia dotyczące projektu.</div>
+                        </div>
+                        <div class="msg-input-area">
+                            <input type="text" id="input-${id}" placeholder="Napisz wiadomość..." onkeypress="wcisnijEnter(event, ${id})">
+                            <button onclick="wyslijWiadomosc(${id})">Wyślij</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="port-out ${portClass}" id="port-out-${id}" style="border-color: ${color}"></div>
+            `;
+            document.getElementById('elements-container').appendChild(node);
+
+            const connection = { id, node, groupEl, startDate, workingDays, color, slotIndex: 0 };
+            connections.push(connection);
+            
+            zaktualizujAkcje(id); // Wywołaj do podpięcia pustych stanów lub stanów początkowych
+            renderSegmenty(connection); makeDraggableNode(node, connection); makeDraggableSchedule(groupEl, connection);
+            obliczSloty(); setTimeout(rysujWszystkieKable, 100);
+        }
+
+        // Funkcja uaktualniająca zachowanie guzików Nawiguj i Zadzwoń bazując na inputach kafelka
+        function zaktualizujAkcje(id) {
+            const tel = document.getElementById(`node-phone-${id}`).value;
+            const adres = document.getElementById(`node-address-${id}`).value;
+            const callBtn = document.getElementById(`call-btn-${id}`);
+            const navBtn = document.getElementById(`nav-btn-${id}`);
+            const pinBtn = document.getElementById(`pin-btn-${id}`);
+            
+            if(tel) {
+                callBtn.href = `tel:${tel}`;
+                callBtn.onclick = null;
+            } else {
+                callBtn.href = `javascript:void(0)`;
+                callBtn.onclick = () => alert('Uzupełnij numer telefonu w formularzu obok!');
+            }
+            
+            if (!pinBtn.innerText.includes("Wgrano")) {
+                if(adres) {
+                    navBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adres)}`;
+                    navBtn.target = "_blank";
+                    navBtn.onclick = null;
+                } else {
+                    navBtn.href = `javascript:void(0)`;
+                    navBtn.onclick = () => alert('Brak adresu! Użyj opcji Złap GPS lub wpisz go obok.');
+                }
+            }
+        }
+
+        function zaktualizujWezel(id) {
+            const conn = connections.find(c => c.id === id);
+            if(!conn) return;
+            const newDateStr = document.getElementById(`inline-date-${id}`).value;
+            const newDaysStr = document.getElementById(`inline-days-${id}`).value;
+            if(newDateStr) { let d = new Date(newDateStr); d.setHours(0,0,0,0); conn.startDate = d; }
+            if(newDaysStr && parseInt(newDaysStr) > 0) { conn.workingDays = parseInt(newDaysStr); }
+            renderSegmenty(conn); obliczSloty(); rysujWszystkieKable();
+        }
+
+        function pobierzPineske(id) {
+            const btn = document.getElementById(`pin-btn-${id}`); const navBtn = document.getElementById(`nav-btn-${id}`); btn.innerText = "⏳ Szukam...";
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude; const lng = position.coords.longitude;
+                    btn.innerHTML = `📍 Wgrano!`; btn.style.backgroundColor = "var(--accent-green)"; btn.style.color = "#000"; btn.style.borderColor = "var(--accent-green)";
+                    navBtn.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`; navBtn.target = "_blank"; navBtn.onclick = null; 
+                    navBtn.style.backgroundColor = "var(--accent-blue)"; navBtn.style.color = "#fff";
+                }, (error) => { btn.innerText = "❌ Błąd GPS"; alert("Zablokowano dostęp do lokalizacji, lub urządzenie nie ma GPS."); }, { enableHighAccuracy: true });
+            } else { alert("Twoje urządzenie nie obsługuje geolokalizacji."); }
+        }
+
+        function wcisnijEnter(e, id) { if(e.key === 'Enter') wyslijWiadomosc(id); }
+        
+        function wyslijWiadomosc(id) {
+            const inputField = document.getElementById(`input-${id}`); const tresc = inputField.value.trim(); if(!tresc) return;
+            const nameInput = document.getElementById(`node-name-${id}`).value;
+            const nazwaWykorzystana = nameInput ? nameInput : "Klient";
+            
+            const chat = document.getElementById(`chat-${id}`);
+            const sentMsg = document.createElement('div'); sentMsg.className = 'msg-bubble msg-sent'; sentMsg.innerText = tresc; chat.appendChild(sentMsg);
+            inputField.value = ''; chat.scrollTop = chat.scrollHeight;
+            
+            setTimeout(() => {
+                const odpMsg = document.createElement('div'); odpMsg.className = 'msg-bubble msg-received';
+                const odpowiedzi =["Dziękuję, będę czekać.", "Zrozumiałem, przesyłam potwierdzenie.", "Super, widzimy się na miejscu.", "Czy mogę prosić o fakturę na to?", "Wszystko się zgadza."];
+                odpMsg.innerHTML = `<strong>${nazwaWykorzystana}:</strong><br>${odpowiedzi[Math.floor(Math.random() * odpowiedzi.length)]}`;
+                chat.appendChild(odpMsg); chat.scrollTop = chat.scrollHeight;
+            }, 2000); 
+        }
+
+        function zaznaczZadanie(btn) {
+            if(btn.style.backgroundColor === 'var(--accent-green)') { btn.style.backgroundColor = '#0c0d12'; btn.style.color = '#8c8d93'; btn.style.borderColor = 'var(--node-border)'; btn.style.boxShadow = 'none'; } 
+            else { btn.style.backgroundColor = 'var(--accent-green)'; btn.style.color = '#000000'; btn.style.borderColor = 'var(--accent-green)'; btn.style.boxShadow = '0 0 15px rgba(0, 230, 118, 0.4)'; }
+        }
+
+        function renderSegmenty(conn) {
+            conn.groupEl.innerHTML = ''; conn.segmentsDOM =[];
+            let currentDate = new Date(conn.startDate); let daysAdded = 0; let currentSegment = null; let segmentsData =[];
+            while(daysAdded < conn.workingDays) {
+                let dayOfWeek = currentDate.getDay(); let isWorkDay = (dayOfWeek !== 0 && dayOfWeek !== 6);
+                if (isWorkDay) { if (!currentSegment) currentSegment = { startD: new Date(currentDate), len: 0 }; currentSegment.len++; daysAdded++; } 
+                else { if (currentSegment) { segmentsData.push(currentSegment); currentSegment = null; } }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            if (currentSegment) segmentsData.push(currentSegment);
+            conn.bbBottomY = dateToY(segmentsData[0].startD);
+            let lastEndDate = new Date(segmentsData[segmentsData.length-1].startD); lastEndDate.setDate(lastEndDate.getDate() + segmentsData[segmentsData.length-1].len);
+            conn.bbTopY = dateToY(lastEndDate);
+
+            const isNodeOnLeft = parseFloat(conn.node.style.left) < 5000;
+            const portInClass = isNodeOnLeft ? 'port-in-left' : 'port-in-right';
+
+            segmentsData.forEach((seg, index) => {
+                const segTopY = dateToY(seg.startD) - (seg.len * dayHeight);
+                const div = document.createElement('div'); div.className = 'schedule-segment'; div.style.top = `${segTopY}px`; div.style.height = `${seg.len * dayHeight}px`;
+                div.style.backgroundColor = `rgba(${hexToRgb(conn.color)}, 0.65)`; div.style.borderColor = conn.color; div.style.boxShadow = `0 0 12px rgba(${hexToRgb(conn.color)}, 0.6)`;
+                if (index === 0) div.innerHTML = `<div class="port-in ${portInClass}" id="port-in-${conn.id}" style="border-color: ${conn.color}"></div>`;
+                conn.groupEl.appendChild(div); conn.segmentsDOM.push(div);
+            });
+            
+            const dateInput = document.getElementById(`inline-date-${conn.id}`);
+            if(dateInput) dateInput.value = toYYYYMMDD(conn.startDate);
+            const daysInput = document.getElementById(`inline-days-${conn.id}`);
+            if(daysInput) daysInput.value = conn.workingDays;
+        }
+
+        function obliczSloty() {
+            const sorted = [...connections].sort((a,b) => b.bbBottomY - a.bbBottomY); let slots =[];
+            sorted.forEach(conn => {
+                let placed = false;
+                for(let i=0; i<slots.length; i++) { if (conn.bbBottomY <= slots[i]) { conn.slotIndex = i; slots[i] = conn.bbTopY; placed = true; break; } }
+                if(!placed) { conn.slotIndex = slots.length; slots.push(conn.bbTopY); }
+                conn.groupEl.style.left = `${5020 + (conn.slotIndex * 20)}px`;
+            });
+        }
+
+        function makeDraggableNode(node, conn) {
+            let startX=0, startY=0; const portOut = document.getElementById(`port-out-${conn.id}`);
+            node.onmousedown = (e) => {
+                if(e.target.closest('.action-btn, .task-btn, .messenger-module, input, button, a')) return; 
+                e.stopPropagation(); node.classList.add('dragging'); startX = e.clientX; startY = e.clientY;
+                document.onmousemove = (mv) => {
+                    let dx = (mv.clientX - startX) / transform.scale; let dy = (mv.clientY - startY) / transform.scale;
+                    startX = mv.clientX; startY = mv.clientY;
+                    const newLeft = parseFloat(node.style.left) + dx;
+                    node.style.left = newLeft + "px"; node.style.top = (parseFloat(node.style.top) + dy) + "px"; 
+                    const portIn = document.getElementById(`port-in-${conn.id}`);
+                    if(newLeft < 5000) { portOut.className = `port-out port-right`; if(portIn) portIn.className = `port-in port-in-left`; } 
+                    else { portOut.className = `port-out port-left`; if(portIn) portIn.className = `port-in port-in-right`; }
+                    rysujWszystkieKable();
+                };
+                document.onmouseup = () => { node.classList.remove('dragging'); document.onmousemove = null; document.onmouseup = null; };
+            };
+        }
+
+        function makeDraggableSchedule(group, conn) {
+            let startMouseY = 0; let initialDateStr = '';
+            group.onmousedown = (e) => {
+                e.stopPropagation(); startMouseY = e.clientY; initialDateStr = conn.startDate.toISOString();
+                document.onmousemove = (mv) => {
+                    let dy = (mv.clientY - startMouseY) / transform.scale; let deltaDays = Math.round(-dy / dayHeight); 
+                    let newDate = new Date(initialDateStr); newDate.setDate(newDate.getDate() + deltaDays);
+                    if (conn.startDate.getTime() !== newDate.getTime()) { 
+                        conn.startDate = newDate; renderSegmenty(conn); obliczSloty(); rysujWszystkieKable(); 
+                    }
+                };
+                document.onmouseup = () => { document.onmousemove = null; document.onmouseup = null; rysujWszystkieKable(); };
+            };
+        }
+
+        const svgLayer = document.getElementById('cables-layer');
+        
+        function rysujWszystkieKable() {
+            svgLayer.innerHTML = ''; const canvasRect = canvas.getBoundingClientRect();
+            connections.forEach(conn => {
+                const portOut = document.getElementById(`port-out-${conn.id}`); const portIn = document.getElementById(`port-in-${conn.id}`);
+                if (portOut && portIn) {
+                    const outR = portOut.getBoundingClientRect(); const inR = portIn.getBoundingClientRect();
+                    const sX = (outR.left - canvasRect.left + outR.width/2) / transform.scale; const sY = (outR.top - canvasRect.top + outR.height/2) / transform.scale;
+                    const eX = (inR.left - canvasRect.left + inR.width/2) / transform.scale; const eY = (inR.top - canvasRect.top + inR.height/2) / transform.scale;
+                    
+                    const isNodeOnLeft = parseFloat(conn.node.style.left) < 5000;
+                    const dist = Math.abs(eX - sX) * 0.5;
+                    const c1X = isNodeOnLeft ? sX + dist : sX - dist; const c2X = isNodeOnLeft ? eX - dist : eX + dist; 
+
+                    const mainPath = `M ${sX} ${sY} C ${c1X} ${sY}, ${c2X} ${eY}, ${eX} ${eY}`;
+                    const p1 = document.createElementNS("http://www.w3.org/2000/svg", "path"); p1.setAttribute("d", mainPath); p1.setAttribute("class", "cable cable-main"); svgLayer.appendChild(p1);
+                }
+                if (conn.segmentsDOM.length > 1) {
+                    for(let i=0; i < conn.segmentsDOM.length - 1; i++) {
+                        const r1 = conn.segmentsDOM[i].getBoundingClientRect(); const r2 = conn.segmentsDOM[i+1].getBoundingClientRect();
+                        const startX = (r1.right - canvasRect.left) / transform.scale; const startY = (r1.top - canvasRect.top) / transform.scale;
+                        const endX = (r2.right - canvasRect.left) / transform.scale; const endY = (r2.bottom - canvasRect.top) / transform.scale;
+                        const loopPath = `M ${startX} ${startY} C ${startX + 60} ${startY}, ${endX + 60} ${endY}, ${endX} ${endY}`;
+                        const pLoop = document.createElementNS("http://www.w3.org/2000/svg", "path"); pLoop.setAttribute("d", loopPath); pLoop.setAttribute("class", "cable cable-loop"); pLoop.setAttribute("stroke", conn.color); svgLayer.appendChild(pLoop);
+                    }
+                }
+            });
+        }
+
+        function hexToRgb(hex) { let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return `${r}, ${g}, ${b}`; }
+
+        generujLinijke(); skupNaDzisiaj(); aktualizujLupę(); 
+
+        // Na start ładujemy jedną testową formatkę
+        setTimeout(() => {
+            utworzWezel({
+                nazwa: "Meble Adam Kowalski",
+                tel: "500123456",
+                adres: "Warszawa, Złota 44",
+                days: 3
+            });
+        }, 100);
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "Stolarnia PRO",
+  "short_name": "Stolarnia",
+  "description": "Kalkulatory stolarskie – szafki rogowe, półki, lamele, gięcie MDF",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#E8E4DD",
+  "theme_color": "#D8D3CB",
+  "orientation": "any",
+  "scope": ".",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23D8D3CB' rx='32'/%3E%3Ctext x='96' y='118' text-anchor='middle' font-size='100' font-weight='800' font-family='sans-serif' fill='%235C4F72'%3ESP%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23D8D3CB' rx='64'/%3E%3Ctext x='256' y='310' text-anchor='middle' font-size='260' font-weight='800' font-family='sans-serif' fill='%235C4F72'%3ESP%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23D8D3CB' rx='32'/%3E%3Ctext x='96' y='118' text-anchor='middle' font-size='100' font-weight='800' font-family='sans-serif' fill='%235C4F72'%3ESP%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

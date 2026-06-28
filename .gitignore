@@ -1,0 +1,8 @@
+node_modules/
+uploads/
+.vscode/
+server.js
+start_server.bat
+stop_server.bat
+*.PNG
+*.png

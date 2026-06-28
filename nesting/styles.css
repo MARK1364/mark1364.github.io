@@ -1,0 +1,430 @@
+:root {
+    --bg-main: #E8E4DD;
+    --bg-panel: #F4F1EB;
+    --bg-panel-hover: #EDE9E2;
+    --text-main: #3D3A36;
+    --text-muted: #6E6962;
+    --accent: #7A6B8F;
+    --accent-hover: #5C4F72;
+    --border: #C9C4BB;
+    --success: #2d6a4f;
+    --error: #c0392b;
+    --board-bg: #F0EDE7;
+    --part-bg: rgba(122, 107, 143, 0.2);
+    --part-border: rgba(92, 79, 114, 0.75);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    height: 100%;
+}
+
+.sidebar {
+    width: 480px;
+    background-color: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    z-index: 10;
+    box-shadow: 2px 0 15px rgba(0,0,0,0.3);
+}
+
+.logo h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.logo p {
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-bottom: 20px;
+}
+
+.panel {
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.panel h3 {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.input-group label {
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    color: var(--text-muted);
+}
+
+.input-group input {
+    background-color: var(--bg-main);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+}
+
+.row .input-group {
+    flex: 1;
+}
+
+.mt-2 {
+    margin-top: 10px;
+}
+
+.list-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.btn-icon {
+    background: var(--accent);
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.btn-icon:hover {
+    background: var(--accent-hover);
+}
+
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg-main);
+    min-height: 0;
+}
+
+.table-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.excel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.excel-table th {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    padding: 8px 6px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.excel-table td {
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    padding: 0;
+}
+
+.excel-table input, .excel-table select {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    padding: 8px 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+}
+
+.excel-table select {
+    cursor: pointer;
+}
+
+.excel-table select option {
+    background: var(--bg-panel);
+    color: var(--text-main);
+}
+
+.excel-table input[type="number"] {
+    text-align: right;
+    -moz-appearance: textfield;
+}
+
+.excel-table input[type="number"]::-webkit-outer-spin-button,
+.excel-table input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.excel-table input:focus, .excel-table select:focus {
+    background: rgba(99, 102, 241, 0.1);
+    box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.excel-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.btn-remove-row {
+    background: transparent;
+    border: none;
+    color: var(--error);
+    cursor: pointer;
+    font-size: 1.2rem;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
+
+.btn-remove-row:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.actions {
+    margin-top: 15px;
+}
+
+.btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--bg-panel-hover);
+}
+
+.btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.status-msg {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    text-align: center;
+    min-height: 20px;
+}
+
+.status-msg.error {
+    color: var(--error);
+}
+
+.status-msg.success {
+    color: var(--success);
+}
+
+.workspace {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--board-bg);
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.toolbar {
+    height: 60px;
+    background-color: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 5;
+    flex-shrink: 0;
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.stats strong {
+    color: var(--text-main);
+    font-size: 1rem;
+}
+
+.boards-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+    overflow-y: auto;
+    background: var(--board-bg);
+    gap: 32px;
+    min-height: 0;
+}
+
+.board-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+    max-width: 920px;
+}
+
+.board-title {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.nesting-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: transparent;
+    box-shadow: none;
+}
+
+.svg-part {
+    fill: rgba(122, 107, 143, 0.18);
+    stroke: #5C4F72;
+    stroke-width: 1;
+    transition: fill 0.2s, stroke-width 0.1s;
+    cursor: pointer;
+}
+
+.svg-part:hover {
+    fill: rgba(122, 107, 143, 0.32);
+    stroke-width: 2;
+}
+
+.svg-text {
+    fill: #3D3A36;
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    pointer-events: none;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+.svg-dims {
+    fill: #6E6962;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    pointer-events: none;
+    text-anchor: middle;
+}
+
+@media (max-width: 900px) {
+    .app-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        max-height: 45%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+}

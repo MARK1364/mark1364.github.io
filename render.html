@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stolarnia PRO — Render AI</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #E8E4DD; color: #3D3A36; min-height: 100vh; }
+
+        nav {
+            background: #D8D3CB; padding: 0 24px;
+            display: flex; align-items: center; gap: 20px; height: 52px;
+            border-bottom: 2px solid #6c5ce7;
+        }
+        nav.embed-hide { display: none; }
+        nav .logo { font-size: 1.1em; font-weight: 800; color: #a29bfe; text-decoration: none; }
+        nav a { color: #b2bec3; text-decoration: none; font-size: 0.9em; padding: 6px 12px; border-radius: 6px; }
+        nav a:hover { background: #6c5ce7; color: white; }
+
+        .container { max-width: 960px; margin: 0 auto; padding: 20px 20px 40px; }
+        h1 { text-align: center; margin-bottom: 20px; font-size: 1.8em; color: #a29bfe; }
+
+        .card { background: #16213e; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .card-title { font-size: 19px; font-weight: bold; margin-bottom: 10px; color: #eee; }
+        .step-badge {
+            display: inline-block; background: #6c5ce7; color: white;
+            border-radius: 50%; width: 26px; height: 26px; text-align: center;
+            line-height: 26px; font-size: 0.85em; margin-right: 8px;
+        }
+
+        input[type="password"], textarea, select {
+            width: 100%; padding: 8px 12px; border-radius: 6px;
+            border: 1px solid #333; background: #0f3460; color: #eee;
+            font-size: 16px; height: 40px;
+        }
+        textarea { resize: vertical; min-height: 90px; height: auto; }
+        select option { background: #0f3460; }
+
+        #drop-area {
+            border: 2px dashed #a29bfe; border-radius: 10px; padding: 24px 16px;
+            text-align: center; cursor: pointer; transition: background 0.2s; color: #a29bfe;
+            font-size: 15px;
+        }
+        #drop-area:hover, #drop-area.dragover { background: #0f3460; }
+
+        button {
+            width: 100%; padding: 10px 14px; background: #6c5ce7; color: white;
+            border: none; border-radius: 8px; font-size: 16px; cursor: pointer;
+            min-height: 44px; font-weight: 600;
+        }
+        button:hover:not(:disabled) { background: #a29bfe; }
+        button:disabled { background: #444; cursor: not-allowed; }
+
+        #status {
+            text-align: center; padding: 10px; border-radius: 8px; margin-top: 10px;
+            background: #0f3460; font-size: 15px; display: none; line-height: 1.4;
+        }
+        #status.error { background: #5c1c1c; color: #ff7675; }
+
+        .images-row { display: flex; gap: 16px; flex-wrap: wrap; }
+        .img-box { flex: 1; min-width: 220px; }
+        .img-box h3 { font-size: 17px; font-weight: 600; color: #a29bfe; margin-bottom: 8px; }
+        .img-box img { width: 100%; border-radius: 8px; display: none; border: 1px solid #333; }
+
+        .tip { font-size: 15px; color: #9aa0a6; margin-top: 6px; line-height: 1.4; }
+        .row2 { display: flex; gap: 10px; }
+        .row2 > div { flex: 1; }
+        label { display: block; margin-bottom: 4px; font-size: 17px; font-weight: 500; color: #c8c8e0; }
+
+        a.dl-btn {
+            display: inline-block; margin-top: 10px; padding: 8px 16px;
+            background: #00b894; color: white; border-radius: 6px; text-decoration: none;
+            font-size: 0.85em; display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px 10px 20px; }
+            h1 { font-size: 1.35em; margin-bottom: 12px; }
+            .card { padding: 14px; margin-bottom: 10px; }
+            .card-title { font-size: 18px; }
+            label { font-size: 18px; }
+            .row2 { flex-direction: column; gap: 8px; }
+            .img-box { min-width: 100%; }
+            .tip { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav id="nav">
+    <a href="index.html#render" class="logo">🪚 Stolarnia PRO</a>
+    <a href="index.html">← Aplikacja</a>
+</nav>
+
+<div class="container">
+    <h1>🎨 Render AI — Wizualizator</h1>
+
+    <div class="card">
+        <div class="card-title"><span class="step-badge">1</span>Klucz OpenRouter API</div>
+        <input type="password" id="api-key" placeholder="sk-or-... (z openrouter.ai/keys)">
+        <p class="tip">Zaloguj się na openrouter.ai → Keys → Create Key</p>
+    </div>
+
+    <div class="card">
+        <div class="card-title"><span class="step-badge">2</span>Zdjęcie projektu z PRO100</div>
+        <div id="drop-area">📁 Przeciągnij zdjęcie tutaj lub kliknij, żeby wybrać</div>
+        <input type="file" id="file-input" hidden accept="image/*">
+        <p class="tip">Max ~4MB. Model widzi Twoje zdjęcie i edytuje je — zachowa układ szafek.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-title"><span class="step-badge">3</span>Co chcesz zmienić?</div>
+        <textarea id="user-prompt" placeholder="np. Zmień fronty na dębowe, dodaj złote uchwyty, blat marmurowy biały, oświetlenie LED pod górnymi szafkami, styl nowoczesny"></textarea>
+        <div class="row2" style="margin-top:12px;">
+            <div>
+                <label>Jakość rozumowania</label>
+                <select id="reasoning">
+                    <option value="medium" selected>Medium (szybko)</option>
+                    <option value="high">High (lepsza jakość)</option>
+                    <option value="xhigh">XHigh (najlepsza, wolniej)</option>
+                </select>
+            </div>
+            <div>
+                <label>Rozdzielczość</label>
+                <select id="resolution">
+                    <option value="1K" selected>1K (standardowa)</option>
+                    <option value="2K">2K (wysoka)</option>
+                    <option value="4K">4K (najwyższa)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <button id="send-btn">✨ Generuj wizualizację (Riverflow V2.5 Pro)</button>
+        <div id="status"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Wynik</div>
+        <div class="images-row">
+            <div class="img-box">
+                <h3>📷 Oryginał (PRO100)</h3>
+                <img id="preview-orig">
+            </div>
+            <div class="img-box">
+                <h3>🎨 Po zmianach (Riverflow AI)</h3>
+                <img id="preview-gen">
+                <a id="dl-btn" class="dl-btn" download="wizualizacja.png">⬇ Pobierz</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    if (new URLSearchParams(location.search).get('embed') === '1') {
+        document.getElementById('nav').classList.add('embed-hide');
+    }
+
+    const dropArea  = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    const origImg   = document.getElementById('preview-orig');
+    const genImg    = document.getElementById('preview-gen');
+    const sendBtn   = document.getElementById('send-btn');
+    const statusEl  = document.getElementById('status');
+    const dlBtn     = document.getElementById('dl-btn');
+
+    let selectedFile = null;
+    let imageDataUrl = null;
+
+    dropArea.addEventListener('click', () => fileInput.click());
+    dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.classList.add('dragover'); });
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+    dropArea.addEventListener('drop', (e) => { e.preventDefault(); dropArea.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+    function handleFile(file) {
+        if (!file) return;
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imageDataUrl = e.target.result;
+            origImg.src = imageDataUrl;
+            origImg.style.display = 'block';
+            dropArea.textContent = '✅ ' + file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function setStatus(msg, isError = false) {
+        statusEl.style.display = 'block';
+        statusEl.className = isError ? 'error' : '';
+        statusEl.textContent = msg;
+    }
+
+    sendBtn.addEventListener('click', async () => {
+        const apiKey     = document.getElementById('api-key').value.trim();
+        const userPrompt = document.getElementById('user-prompt').value.trim();
+        const reasoning  = document.getElementById('reasoning').value;
+        const resolution = document.getElementById('resolution').value;
+
+        if (!apiKey)       { setStatus('❌ Podaj klucz OpenRouter API!', true); return; }
+        if (!selectedFile) { setStatus('❌ Wgraj zdjęcie projektu!', true); return; }
+        if (!userPrompt)   { setStatus('❌ Opisz jakie zmiany chcesz!', true); return; }
+
+        if (selectedFile.size > 4 * 1024 * 1024) {
+            setStatus('❌ Plik za duży (max 4MB). Zmniejsz zdjęcie.', true); return;
+        }
+
+        sendBtn.disabled = true;
+        genImg.style.display = 'none';
+        dlBtn.style.display = 'none';
+
+        try {
+            setStatus(`🎨 Riverflow V2.5 Pro edytuje zdjęcie (${reasoning}, ${resolution})... może potrwać 30-60 sek.`);
+
+            const prompt = `You are a professional interior designer and kitchen furniture visualizer.
+You have a kitchen project image from PRO100 design software.
+Apply these changes: ${userPrompt}.
+IMPORTANT: Keep the EXACT same cabinet layout, dimensions, and room composition.
+Only change what is specified. Make it photorealistic, high quality, professional interior photography.`;
+
+            const body = {
+                model: 'sourceful/riverflow-v2.5-pro:free',
+                messages: [
+                    {
+                        role: 'user',
+                        content: [
+                            { type: 'text', text: prompt },
+                            { type: 'image_url', image_url: { url: imageDataUrl } }
+                        ]
+                    }
+                ],
+                modalities: ['image'],
+                image_config: {
+                    image_size: resolution,
+                    reasoning: reasoning,
+                    scoring_prompt: 'Prefer photorealistic result, preserve cabinet layout, apply exactly the requested material and style changes.'
+                }
+            };
+
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': 'http://localhost:3000',
+                    'X-Title': 'Stolarnia AI'
+                },
+                body: JSON.stringify(body)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data?.error?.message || JSON.stringify(data));
+            }
+
+            const images = data?.choices?.[0]?.message?.images;
+            if (!images || images.length === 0) {
+                const txt = data?.choices?.[0]?.message?.content;
+                throw new Error('Brak obrazu w odpowiedzi.' + (txt ? ' Info: ' + txt : ''));
+            }
+
+            const imgUrl = images[0].image_url.url;
+            genImg.src = imgUrl;
+            genImg.style.display = 'block';
+            dlBtn.href = imgUrl;
+            dlBtn.style.display = 'inline-block';
+            setStatus('✅ Gotowe! Wizualizacja wygenerowana przez Riverflow V2.5 Pro.');
+
+        } catch (err) {
+            setStatus('❌ Błąd: ' + err.message, true);
+            console.error(err);
+        } finally {
+            sendBtn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

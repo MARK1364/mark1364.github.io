@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23D8D3CB' rx='12'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-size='32' font-weight='800' font-family='sans-serif' fill='%235C4F72'%3ESP%3C/text%3E%3C/svg%3E">
+    <title>Kalkulator Lameli - Start i Koniec</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #E8E4DD;
+            color: #3D3A36;
+            overflow: hidden;
+            font-size: 15px;
+        }
+        .container {
+            display: flex;
+            height: 100%;
+            gap: 8px;
+            padding: 8px;
+        }
+        .panel {
+            background: #F4F1EB;
+            border-radius: 10px;
+            padding: 8px 10px;
+            border: 1px solid #C9C4BB;
+        }
+        .left-panel {
+            flex: 0 0 340px;
+            overflow-y: auto;
+            max-height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .right-panel {
+            flex: 1;
+            min-width: 0;
+        }
+        .svg-container {
+            background: #F0EDE7;
+            border-radius: 10px;
+            padding: 10px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #C9C4BB;
+            position: relative;
+        }
+        .svg-hint {
+            flex-shrink: 0;
+            font-size: 13px;
+            color: #6E6962;
+            margin-bottom: 4px;
+        }
+        svg {
+            border-radius: 6px;
+            background: #EDE9E2;
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            touch-action: manipulation;
+        }
+        .params-hidden { display: none; }
+        .dim-front-layer { pointer-events: bounding-box; }
+        .dim-editable { cursor: pointer; pointer-events: all; }
+        .dim-editable.dim-board-dim .dim-hit {
+            fill: rgba(16, 185, 129, 0.42);
+            stroke: #10b981;
+            stroke-width: 2.5;
+            opacity: 1;
+            animation: lamelPulse 2.5s ease-in-out infinite;
+        }
+        .dim-editable.dim-board-dim .dim-hit,
+        .dim-static-board-dim .dim-hit-static,
+        .dim-result-board-dim .dim-hit-static {
+            rx: 10;
+            ry: 10;
+        }
+        .dim-editable.dim-board-dim:hover .dim-hit {
+            fill: rgba(16, 185, 129, 0.5);
+            stroke: #34d399;
+            stroke-width: 3;
+        }
+        .dim-editable.dim-board-dim text {
+            fill: #ffffff;
+            font-weight: 800;
+        }
+        .dim-editable.dim-green-badge { cursor: pointer; }
+        .dim-editable.dim-green-badge .dim-badge-ring {
+            fill: rgba(16, 185, 129, 0.38);
+            stroke: #10b981;
+            stroke-width: 3;
+            animation: lamelPulse 2.5s ease-in-out infinite;
+            pointer-events: all;
+            cursor: pointer;
+        }
+        .dim-editable.dim-green-badge:hover .dim-badge-ring {
+            fill: rgba(16, 185, 129, 0.55);
+            stroke: #34d399;
+            stroke-width: 3.5;
+            animation-play-state: paused;
+        }
+        .dim-editable.dim-green-badge .dim-badge-num {
+            fill: #ffffff;
+            font-weight: 800;
+            pointer-events: none;
+        }
+        .dim-editable.dim-green-badge .dim-badge-label {
+            fill: #d1fae5;
+            font-weight: 600;
+            pointer-events: none;
+        }
+        .dim-result-badge { pointer-events: none; }
+        .dim-result-badge .dim-badge-ring {
+            fill: rgba(255, 252, 248, 0.96);
+            stroke: #C9C4BB;
+            stroke-width: 2.5;
+        }
+        .dim-result-badge .dim-badge-num {
+            fill: #3D3A36;
+            font-weight: 800;
+            pointer-events: none;
+        }
+        .dim-result-badge .dim-badge-label {
+            fill: #6E6962;
+            font-weight: 600;
+            pointer-events: none;
+        }
+        @keyframes lamelPulse {
+            0%, 100% { fill: rgba(16, 185, 129, 0.28); stroke-width: 2.5; }
+            50% { fill: rgba(16, 185, 129, 0.52); stroke-width: 3.5; }
+        }
+        .dim-editable text { pointer-events: none; }
+        .dim-static-board-dim text {
+            fill: #ffffff;
+            font-weight: 800;
+            pointer-events: none;
+        }
+        .dim-static-board-dim .dim-hit-static {
+            fill: rgba(16, 185, 129, 0.38);
+            stroke: #10b981;
+            stroke-width: 2.5;
+            pointer-events: none;
+        }
+        .dim-result-board-dim { pointer-events: none; }
+        .dim-result-board-dim text {
+            fill: #3D3A36;
+            font-weight: 800;
+            pointer-events: none;
+        }
+        .dim-result-board-dim .dim-hit-static {
+            fill: rgba(255, 252, 248, 0.96);
+            stroke: #C9C4BB;
+            stroke-width: 2.5;
+            pointer-events: none;
+        }
+        .dim-editor {
+            position: absolute;
+            z-index: 20;
+            background: #FFFCF8;
+            border: 2px solid #7A6B8F;
+            border-radius: 8px;
+            padding: 10px 12px;
+            box-shadow: 0 6px 20px rgba(61, 58, 54, 0.18);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 160px;
+        }
+        .dim-editor[hidden] { display: none !important; }
+        .dim-editor label { font-size: 13px; font-weight: 600; color: #5C4F72; }
+        .dim-editor input { height: 38px; font-size: 18px; font-weight: 600; }
+        .dim-editor-actions { display: flex; gap: 6px; }
+        .dim-editor-actions button {
+            flex: 1;
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .dim-editor-ok { background: #7A6B8F; color: #fff; }
+        .dim-editor-ok:hover { filter: brightness(1.08); }
+        .dim-editor-cancel { background: #EDE9E2; color: #5A5550; border: 1px solid #C9C4BB !important; }
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #3D3A36;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        h1::before {
+            content: "";
+            width: 3px;
+            height: 18px;
+            background: linear-gradient(180deg, #7A6B8F, #5C4F72);
+            border-radius: 2px;
+        }
+        h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #5C4F72;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 6px 0 3px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 8px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .input-group.full { grid-column: 1 / -1; }
+        label {
+            font-size: 17px;
+            font-weight: 500;
+            color: #5A5550;
+            line-height: 1.2;
+        }
+        input, select {
+            width: 100%;
+            padding: 6px 10px;
+            height: 40px;
+            background: #FFFCF8;
+            border: 1px solid #C9C4BB;
+            border-radius: 6px;
+            color: #3D3A36;
+            font-size: 16px;
+        }
+        input:focus, select:focus { outline: none; border-color: #7A6B8F; }
+        .input-result {
+            background: #EDE9E2 !important;
+            color: #5C4F72 !important;
+            font-weight: 700;
+        }
+        .calc-row-sub {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .calc-row-sub-label {
+            color: #6E6962;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .calc-row-sub input {
+            width: 56px;
+            height: 30px;
+            padding: 4px 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: right;
+            border: 1px solid #C9C4BB;
+            border-radius: 6px;
+            background: #FFFCF8;
+        }
+        .calc-row-sub input:focus {
+            outline: none;
+            border-color: #7A6B8F;
+        }
+        .calc-sheet {
+            background: #EDE9E2;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-top: 6px;
+            border: 1px solid #D5D0C8;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .calc-row {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 3px;
+            padding: 8px 0;
+            border-bottom: 1px solid #D8D3CB;
+        }
+        .calc-row:last-of-type {
+            border-bottom: none;
+            padding-bottom: 4px;
+        }
+        .calc-row-label {
+            color: #6E6962;
+            font-weight: 600;
+            font-size: 13px;
+            line-height: 1.2;
+        }
+        .calc-row-value {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px 6px;
+            font-size: 15px;
+            line-height: 1.4;
+            color: #3D3A36;
+            font-variant-numeric: tabular-nums;
+        }
+        .calc-qty {
+            font-weight: 800;
+            font-size: 16px;
+            color: #3D3A36;
+        }
+        .calc-row-value input {
+            width: 72px;
+            height: 34px;
+            padding: 4px 8px;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: right;
+            border: 1px solid #C9C4BB;
+            border-radius: 6px;
+            background: #FFFCF8;
+            color: #3D3A36;
+        }
+        .calc-row-value input:focus {
+            outline: none;
+            border-color: #7A6B8F;
+        }
+        .calc-unit { color: #6E6962; font-size: 14px; }
+        .calc-eq { color: #6E6962; }
+        .calc-result {
+            font-weight: 800;
+            font-size: 16px;
+            color: #5C4F72;
+            white-space: nowrap;
+        }
+        .calc-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #C9C4BB;
+            margin-top: 4px;
+            padding-top: 10px;
+            font-size: 17px;
+            font-weight: 700;
+            color: #5C4F72;
+        }
+        .calc-total-row span:last-child {
+            color: #3D3A36;
+            font-variant-numeric: tabular-nums;
+        }
+
+        @media (max-width: 768px) {
+            body { overflow: auto; -webkit-text-size-adjust: 100%; }
+            .container { flex-direction: column; height: auto; min-height: 100%; padding: 10px; gap: 10px; }
+            .left-panel { flex: none; width: 100%; max-height: none; }
+            .right-panel { flex: none; width: 100%; min-height: 260px; height: 40vh; }
+            .form-grid { grid-template-columns: 1fr; gap: 6px; }
+            label { font-size: 18px; }
+            h1 { font-size: 22px; }
+            h2 { font-size: 17px; }
+            .calc-row-value { font-size: 16px; }
+            .calc-qty, .calc-result { font-size: 17px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="panel left-panel">
+        <h1>Lamele</h1>
+
+        <select id="mode" hidden onchange="updateUI()">
+            <option value="count">Ile wejdzie w płytę</option>
+            <option value="width">Wylicz szerokość płyty</option>
+        </select>
+
+        <h2>Wyliczenia</h2>
+        <div class="calc-sheet">
+            <div class="calc-row">
+                <div class="calc-row-label">Obrzeże</div>
+                <div class="calc-row-value">
+                    (<span class="calc-qty" id="edgeMbQty">0,0 mb</span>)
+                    <span class="calc-unit">×</span>
+                    <input type="number" id="edgePrice" value="2.50" step="0.01" min="0" oninput="calculateCosts()">
+                    <span class="calc-unit">PLN/m</span>
+                    <span class="calc-eq">=</span>
+                    <span class="calc-result" id="edgeCostResult">0 PLN</span>
+                </div>
+            </div>
+            <div class="calc-row">
+                <div class="calc-row-label">Płyta lameli</div>
+                <div class="calc-row-sub">
+                    <span class="calc-row-sub-label">Wysokość lameli</span>
+                    <input type="number" id="lamelWidth" value="35" min="1" step="1" oninput="calculate()">
+                    <span class="calc-unit">mm</span>
+                </div>
+                <div class="calc-row-sub">
+                    <span class="calc-row-sub-label">Długość listwy</span>
+                    <input type="number" id="slatLength" value="1500" min="100" max="4000" step="1" oninput="onSlatLengthInput()">
+                    <span class="calc-unit">mm</span>
+                </div>
+                <div class="calc-row-value">
+                    (<span class="calc-qty" id="lamelAreaQty">0,00 m²</span>)
+                    <span class="calc-unit">×</span>
+                    <input type="number" id="boardPrice" value="150" step="1" min="0" oninput="calculateCosts()">
+                    <span class="calc-unit">PLN/m²</span>
+                    <span class="calc-eq">=</span>
+                    <span class="calc-result" id="boardCostResult">0 PLN</span>
+                </div>
+            </div>
+            <div class="calc-row">
+                <div class="calc-row-label">Płyta bazowa</div>
+                <div class="calc-row-value">
+                    (<span class="calc-qty" id="baseAreaQty">0,00 m²</span>)
+                    <span class="calc-unit">×</span>
+                    <input type="number" id="baseBoardPrice" value="150" step="1" min="0" oninput="calculateCosts()">
+                    <span class="calc-unit">PLN/m²</span>
+                    <span class="calc-eq">=</span>
+                    <span class="calc-result" id="baseBoardCostResult">0 PLN</span>
+                </div>
+            </div>
+            <div class="calc-total-row">
+                <span>SUMA</span>
+                <span id="totalCostResult">0 PLN</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel right-panel">
+        <div class="params-hidden" aria-hidden="true">
+            <input type="number" id="boardW" value="2500">
+            <input type="number" id="boardH" value="1500">
+            <input type="number" id="lamelaW" value="18">
+            <input type="number" id="spacing" value="20">
+            <input type="number" id="startEdge" value="20">
+            <input type="number" id="count" value="">
+            <input type="number" id="endEdge" value="">
+        </div>
+        <div class="svg-container" id="svgContainer">
+            <p class="svg-hint">Prostokąty = gabaryty płyty · zielone kółka = edycja · białe kółka = wynik</p>
+            <svg id="visualizer" viewBox="0 0 2500 1500"></svg>
+            <div id="dimEditor" class="dim-editor" hidden>
+                <label id="dimEditorLabel" for="dimEditorInput">Wymiar</label>
+                <input type="number" id="dimEditorInput">
+                <select id="dimEditorSelect" hidden>
+                    <option value="count">Ile wejdzie w płytę</option>
+                    <option value="width">Wylicz szerokość płyty</option>
+                </select>
+                <div class="dim-editor-actions">
+                    <button type="button" class="dim-editor-cancel" id="dimEditorCancel">Anuluj</button>
+                    <button type="button" class="dim-editor-ok" id="dimEditorOk">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const COLOR_EDIT = '#10b981';
+
+    const EDITABLE_DIMS = {
+        boardW: { min: 100, max: 6000, step: 1, label: 'Szerokość płyty', unit: ' mm' },
+        boardH: { min: 100, max: 4000, step: 1, label: 'Wysokość płyty', unit: ' mm' },
+        lamelaW: { min: 5, max: 80, step: 1, label: 'Grubość lameli', unit: ' mm' },
+        spacing: { min: 0, max: 200, step: 1, label: 'Odstęp między lamelami', unit: ' mm' },
+        startEdge: { min: 0, max: 2000, step: 1, label: 'Margines startu', unit: ' mm' },
+        count: { min: 0, max: 500, step: 1, label: 'Ilość lameli', unit: '', integer: true },
+        endEdge: { min: 0, max: 2000, step: 0.5, label: 'Margines końca', unit: ' mm' }
+    };
+
+    function occupiedByLamelas(count, lamelaW, spacing) {
+        if (count <= 0) return 0;
+        return (count * lamelaW) + ((count - 1) * spacing);
+    }
+
+    // Promienie w jednostkach mm SVG (płyta 2500×1500), nie skala z Półek
+    const BADGE_MM = {
+        lg: { min: 90, max: 155, ratio: 0.075 },
+        md: { min: 65, max: 115, ratio: 0.055 },
+        sm: { min: 48, max: 85, ratio: 0.04 }
+    };
+
+    function badgeRadius(boardW, boardH, tier, radiusScale = 1) {
+        const s = BADGE_MM[tier] || BADGE_MM.md;
+        const ref = Math.min(boardW, boardH);
+        const r = ref * s.ratio * radiusScale;
+        return Math.max(s.min * Math.sqrt(radiusScale), Math.min(s.max * radiusScale, r));
+    }
+
+    let dimEditorField = null;
+
+    function isDimUiTarget(node) {
+        while (node && node !== document) {
+            if (node.classList && node.classList.contains('dim-editable')) return true;
+            if (node.id === 'dimEditor') return true;
+            node = node.parentNode;
+        }
+        return false;
+    }
+
+    function closeDimEditor() {
+        document.getElementById('dimEditor').hidden = true;
+        dimEditorField = null;
+    }
+
+    function openDimEditor(field, anchorEvent) {
+        if (field === 'mode') {
+            dimEditorField = 'mode';
+            const editor = document.getElementById('dimEditor');
+            const editorInput = document.getElementById('dimEditorInput');
+            const editorSelect = document.getElementById('dimEditorSelect');
+            const editorLabel = document.getElementById('dimEditorLabel');
+            editorInput.hidden = true;
+            editorSelect.hidden = false;
+            editorLabel.textContent = 'Tryb';
+            editorSelect.value = document.getElementById('mode').value;
+            editor.hidden = false;
+            const container = document.getElementById('svgContainer');
+            const rect = container.getBoundingClientRect();
+            const clientX = anchorEvent.clientX ?? (rect.left + rect.width / 2);
+            const clientY = anchorEvent.clientY ?? (rect.top + rect.height / 2);
+            let left = clientX - rect.left + 12;
+            let top = clientY - rect.top - 20;
+            left = Math.max(8, Math.min(left, rect.width - 180));
+            top = Math.max(8, Math.min(top, rect.height - 120));
+            editor.style.left = `${left}px`;
+            editor.style.top = `${top}px`;
+            editorSelect.focus();
+            return;
+        }
+        const cfg = EDITABLE_DIMS[field];
+        const formInput = document.getElementById(field);
+        if (!cfg || !formInput || formInput.disabled) return;
+
+        dimEditorField = field;
+        const editor = document.getElementById('dimEditor');
+        const editorInput = document.getElementById('dimEditorInput');
+        const editorSelect = document.getElementById('dimEditorSelect');
+        const editorLabel = document.getElementById('dimEditorLabel');
+
+        editorInput.hidden = false;
+        editorSelect.hidden = true;
+        editorLabel.textContent = cfg.label + (cfg.unit ? ` (${cfg.unit.trim()})` : '');
+        editorInput.min = cfg.min;
+        editorInput.max = cfg.max;
+        editorInput.step = cfg.step;
+        editorInput.value = formInput.value;
+        editor.hidden = false;
+
+        const container = document.getElementById('svgContainer');
+        const rect = container.getBoundingClientRect();
+        const clientX = anchorEvent.clientX ?? (rect.left + rect.width / 2);
+        const clientY = anchorEvent.clientY ?? (rect.top + rect.height / 2);
+        let left = clientX - rect.left + 12;
+        let top = clientY - rect.top - 20;
+        left = Math.max(8, Math.min(left, rect.width - 180));
+        top = Math.max(8, Math.min(top, rect.height - 120));
+        editor.style.left = `${left}px`;
+        editor.style.top = `${top}px`;
+
+        editorInput.focus();
+        editorInput.select();
+    }
+
+    function commitDimEditor() {
+        if (!dimEditorField) return;
+        if (dimEditorField === 'mode') {
+            const editorSelect = document.getElementById('dimEditorSelect');
+            document.getElementById('mode').value = editorSelect.value;
+            closeDimEditor();
+            updateUI();
+            return;
+        }
+        const cfg = EDITABLE_DIMS[dimEditorField];
+        const formInput = document.getElementById(dimEditorField);
+        const editorInput = document.getElementById('dimEditorInput');
+        let value = parseFloat(editorInput.value);
+        if (Number.isNaN(value)) {
+            editorInput.focus();
+            return;
+        }
+        value = Math.max(cfg.min, Math.min(cfg.max, value));
+        if (cfg.integer) {
+            formInput.value = String(Math.round(value));
+        } else if (dimEditorField === 'endEdge') {
+            formInput.value = value.toFixed(1);
+        } else {
+            formInput.value = String(Math.round(value));
+        }
+        closeDimEditor();
+        calculate();
+    }
+
+    function clientToSvg(svg, clientX, clientY) {
+        const pt = svg.createSVGPoint();
+        pt.x = clientX;
+        pt.y = clientY;
+        const ctm = svg.getScreenCTM();
+        if (!ctm) return { x: clientX, y: clientY };
+        return pt.matrixTransform(ctm.inverse());
+    }
+
+    function placeHitRectFromElement(svg, rect, el, padX, padY) {
+        const box = el.getBoundingClientRect();
+        if (box.width < 1 && box.height < 1) return false;
+        const tl = clientToSvg(svg, box.left, box.top);
+        const br = clientToSvg(svg, box.right, box.bottom);
+        rect.setAttribute('x', Math.min(tl.x, br.x) - padX);
+        rect.setAttribute('y', Math.min(tl.y, br.y) - padY);
+        rect.setAttribute('width', Math.abs(br.x - tl.x) + padX * 2);
+        rect.setAttribute('height', Math.abs(br.y - tl.y) + padY * 2);
+        return true;
+    }
+
+    function applyHitRectRound(rect) {
+        const w = parseFloat(rect.getAttribute('width')) || 0;
+        const h = parseFloat(rect.getAttribute('height')) || 0;
+        const rx = Math.min(12, w * 0.2, h * 0.35);
+        rect.setAttribute('rx', rx);
+        rect.setAttribute('ry', rx);
+    }
+
+    function syncAllDimHitRects(svg) {
+        svg.querySelectorAll('.dim-editable, .dim-static-board-dim, .dim-result-board-dim').forEach(g => {
+            const text = g.querySelector('text');
+            const rect = g.querySelector('.dim-hit, .dim-hit-static');
+            if (!text || !rect) return;
+            const padX = parseFloat(g.dataset.hitPadX || '12');
+            const padY = parseFloat(g.dataset.hitPadY || '10');
+            placeHitRectFromElement(svg, rect, text, padX, padY);
+            applyHitRectRound(rect);
+        });
+    }
+
+    function drawGabaritDimLines(svg, frontLayer, boardW, boardH, dimX, dimY) {
+        svg.querySelectorAll('.dim-gabarit-line').forEach(n => n.remove());
+        const linePad = 8;
+        const sw = 1.5;
+        const tick = 25;
+
+        const insertLine = (line) => {
+            line.setAttribute('class', 'dim-gabarit-line');
+            svg.insertBefore(line, frontLayer);
+        };
+
+        const wG = svg.querySelector('[data-field="boardW"]');
+        if (wG) {
+            const bb = wG.getBBox();
+            const cx = bb.x + bb.width / 2;
+            const gapHalf = bb.width / 2 + linePad;
+            const seg = (x1, x2) => {
+                if (x2 - x1 < 2) return;
+                const line = document.createElementNS(SVG_NS, 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', dimY);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', dimY);
+                line.setAttribute('stroke', COLOR_EDIT);
+                line.setAttribute('stroke-width', sw);
+                insertLine(line);
+            };
+            seg(0, cx - gapHalf);
+            seg(cx + gapHalf, boardW);
+            [[0, dimY, 0, dimY + tick], [boardW, dimY, boardW, dimY + tick]].forEach(([x1, y1, x2, y2]) => {
+                const line = document.createElementNS(SVG_NS, 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                line.setAttribute('stroke', COLOR_EDIT);
+                line.setAttribute('stroke-width', '2');
+                insertLine(line);
+            });
+        }
+
+        const hG = svg.querySelector('[data-field="boardH"]');
+        if (hG) {
+            const bb = hG.getBBox();
+            const cy = bb.y + bb.height / 2;
+            const gapHalf = bb.height / 2 + linePad;
+            const seg = (y1, y2) => {
+                if (y2 - y1 < 2) return;
+                const line = document.createElementNS(SVG_NS, 'line');
+                line.setAttribute('x1', dimX);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', dimX);
+                line.setAttribute('y2', y2);
+                line.setAttribute('stroke', COLOR_EDIT);
+                line.setAttribute('stroke-width', sw);
+                insertLine(line);
+            };
+            seg(0, cy - gapHalf);
+            seg(cy + gapHalf, boardH);
+            [[dimX, 0, dimX + tick, 0], [dimX, boardH, dimX + tick, boardH]].forEach(([x1, y1, x2, y2]) => {
+                const line = document.createElementNS(SVG_NS, 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                line.setAttribute('stroke', COLOR_EDIT);
+                line.setAttribute('stroke-width', '2');
+                insertLine(line);
+            });
+        }
+    }
+
+    function addEditableDim(layer, opts) {
+        const g = document.createElementNS(SVG_NS, 'g');
+        g.setAttribute('class', 'dim-editable dim-board-dim' + (opts.className ? ' ' + opts.className : ''));
+        g.setAttribute('data-field', opts.field);
+        g.setAttribute('role', 'button');
+        g.setAttribute('tabindex', '0');
+        g.dataset.hitPadX = String(opts.hitPadX ?? 12);
+        g.dataset.hitPadY = String(opts.hitPadY ?? 10);
+
+        const hit = document.createElementNS(SVG_NS, 'rect');
+        hit.setAttribute('class', 'dim-hit');
+        g.appendChild(hit);
+
+        const text = document.createElementNS(SVG_NS, 'text');
+        text.setAttribute('x', opts.x);
+        text.setAttribute('y', opts.y);
+        text.setAttribute('font-size', opts.fontSize || 40);
+        text.setAttribute('font-weight', '800');
+        text.setAttribute('font-family', 'sans-serif');
+        text.setAttribute('text-anchor', opts.anchor || 'middle');
+        text.setAttribute('dominant-baseline', 'middle');
+        if (opts.textTransform) text.setAttribute('transform', opts.textTransform);
+        text.textContent = opts.text;
+        g.appendChild(text);
+        layer.appendChild(g);
+
+        const activate = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openDimEditor(opts.field, e);
+        };
+        g.addEventListener('pointerdown', activate);
+        g.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openDimEditor(opts.field, e);
+            }
+        });
+    }
+
+    function addStaticBoardDimLabel(layer, opts) {
+        const isResult = opts.variant === 'result';
+        const g = document.createElementNS(SVG_NS, 'g');
+        g.setAttribute('class', isResult ? 'dim-result-board-dim' : 'dim-static-board-dim');
+        if (opts.field) g.setAttribute('data-field', opts.field);
+        g.dataset.hitPadX = String(opts.hitPadX ?? 14);
+        g.dataset.hitPadY = String(opts.hitPadY ?? 10);
+
+        const hit = document.createElementNS(SVG_NS, 'rect');
+        hit.setAttribute('class', 'dim-hit-static');
+        g.appendChild(hit);
+
+        const text = document.createElementNS(SVG_NS, 'text');
+        text.setAttribute('x', opts.x);
+        text.setAttribute('y', opts.y);
+        text.setAttribute('font-size', opts.fontSize || 40);
+        text.setAttribute('font-weight', '800');
+        text.setAttribute('font-family', 'sans-serif');
+        text.setAttribute('text-anchor', opts.anchor || 'middle');
+        text.setAttribute('dominant-baseline', 'middle');
+        if (opts.textTransform) text.setAttribute('transform', opts.textTransform);
+        text.textContent = opts.text;
+        g.appendChild(text);
+        layer.appendChild(g);
+    }
+
+    function addCircleBadge(layer, opts) {
+        const {
+            field, cx, cy, displayValue, subLabel, boardW, boardH,
+            sizeTier = 'md', radiusScale = 1, variant = 'edit', ariaLabel
+        } = opts;
+        const isResult = variant === 'result';
+        const g = document.createElementNS(SVG_NS, 'g');
+        g.setAttribute('class',
+            (isResult ? 'dim-result-badge' : 'dim-editable dim-green-badge') + ' dim-badge-' + sizeTier);
+
+        const radius = badgeRadius(boardW, boardH, sizeTier, radiusScale);
+        const circle = document.createElementNS(SVG_NS, 'circle');
+        circle.setAttribute('class', 'dim-badge-ring');
+        circle.setAttribute('cx', cx);
+        circle.setAttribute('cy', cy);
+        circle.setAttribute('r', radius);
+        g.appendChild(circle);
+
+        const shown = String(displayValue);
+        const numText = document.createElementNS(SVG_NS, 'text');
+        numText.setAttribute('class', 'dim-badge-num');
+        numText.setAttribute('x', cx);
+        numText.setAttribute('y', cy - (subLabel ? 2 : 0));
+        numText.setAttribute('text-anchor', 'middle');
+        numText.setAttribute('dominant-baseline', 'middle');
+        numText.setAttribute('font-size', Math.round(radius * (shown.length > 3 ? 0.52 : shown.length > 2 ? 0.58 : 0.68)));
+        numText.textContent = shown;
+        g.appendChild(numText);
+
+        if (subLabel) {
+            const labelText = document.createElementNS(SVG_NS, 'text');
+            labelText.setAttribute('class', 'dim-badge-label');
+            labelText.setAttribute('x', cx);
+            labelText.setAttribute('y', cy + radius * 0.42);
+            labelText.setAttribute('text-anchor', 'middle');
+            labelText.setAttribute('dominant-baseline', 'middle');
+            labelText.setAttribute('font-size', Math.round(radius * 0.32));
+            labelText.textContent = subLabel;
+            g.appendChild(labelText);
+        }
+
+        if (!isResult) {
+            g.setAttribute('data-field', field);
+            g.setAttribute('role', 'button');
+            g.setAttribute('tabindex', '0');
+            g.setAttribute('aria-label', ariaLabel || `Edytuj: ${displayValue}`);
+            const activate = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openDimEditor(field, e);
+            };
+            g.addEventListener('pointerdown', activate);
+            g.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openDimEditor(field, e);
+                }
+            });
+        }
+
+        layer.appendChild(g);
+    }
+
+    function onSlatLengthInput() {
+        const cfg = EDITABLE_DIMS.boardH;
+        let value = parseFloat(document.getElementById('slatLength').value);
+        if (Number.isNaN(value)) return;
+        value = Math.round(Math.max(cfg.min, Math.min(cfg.max, value)));
+        document.getElementById('boardH').value = String(value);
+        calculate();
+    }
+
+    function syncSlatLengthDisplay() {
+        const el = document.getElementById('slatLength');
+        if (!el || document.activeElement === el) return;
+        el.value = document.getElementById('boardH').value;
+    }
+
+    function updateUI() {
+        const mode = document.getElementById('mode').value;
+        const isCountMode = (mode === 'count');
+        
+        // Pola blokowane/odblokowane
+        document.getElementById('boardW').disabled = !isCountMode;
+        document.getElementById('count').disabled = isCountMode;
+        document.getElementById('endEdge').disabled = isCountMode;
+
+        if (!isCountMode && !document.getElementById('count').value) {
+            document.getElementById('count').value = 10;
+            document.getElementById('endEdge').value = 20;
+        }
+
+        calculate();
+    }
+
+    function calculate() {
+        const mode = document.getElementById('mode').value;
+        const boardW_in = parseFloat(document.getElementById('boardW').value) || 0;
+        const boardH = parseFloat(document.getElementById('boardH').value) || 0;
+        const lamelaW = parseFloat(document.getElementById('lamelaW').value) || 0;
+        const spacing = parseFloat(document.getElementById('spacing').value) || 0;
+        const startEdge = parseFloat(document.getElementById('startEdge').value) || 0;
+
+        let boardW = boardW_in;
+        let count = parseInt(document.getElementById('count').value, 10);
+        let endEdge = parseFloat(document.getElementById('endEdge').value);
+
+        if (Number.isNaN(count)) count = 0;
+        if (Number.isNaN(endEdge)) endEdge = 0;
+
+        if (mode === 'count') {
+            // n lamelaW + (n-1) spacing + startEdge <= boardW
+            // n = floor((boardW - startEdge + spacing) / (lamelaW + spacing))
+            if (lamelaW + spacing > 0) {
+                count = Math.floor((boardW - startEdge + spacing) / (lamelaW + spacing));
+            } else {
+                count = 0;
+            }
+            if (count < 0) count = 0;
+
+            const occupied = occupiedByLamelas(count, lamelaW, spacing);
+            endEdge = Math.max(0, boardW - startEdge - occupied);
+
+            document.getElementById('count').value = count;
+            document.getElementById('endEdge').value = endEdge.toFixed(1);
+        } else {
+            count = Math.max(0, count || 0);
+            endEdge = Math.max(0, endEdge || 0);
+            boardW = startEdge + occupiedByLamelas(count, lamelaW, spacing) + endEdge;
+            document.getElementById('boardW').value = Math.round(boardW);
+        }
+
+        syncSlatLengthDisplay();
+        updateDisplay(count, spacing, startEdge, endEdge, boardW, boardH, lamelaW);
+        calculateCosts({ count, boardW, boardH });
+    }
+
+    function fmtPl(n, decimals = 1) {
+        return n.toFixed(decimals).replace('.', ',');
+    }
+
+    function fmtPln(n) {
+        return Math.round(n).toLocaleString('pl-PL') + ' PLN';
+    }
+
+    function calculateCosts(state = {}) {
+        const count = state.count ?? (parseInt(document.getElementById('count').value, 10) || 0);
+        const edgePrice = parseFloat(document.getElementById('edgePrice').value) || 0;
+        const boardPrice = parseFloat(document.getElementById('boardPrice').value) || 0;
+        const lamelWidth = parseFloat(document.getElementById('lamelWidth').value) || 0;
+        const boardH = state.boardH ?? (parseFloat(document.getElementById('boardH').value) || 0);
+        const boardW = state.boardW ?? (parseFloat(document.getElementById('boardW').value) || 0);
+        const baseBoardPrice = parseFloat(document.getElementById('baseBoardPrice').value) || 0;
+
+        const edgeMb = (count * boardH) / 1000;
+        const lamelArea = (count * lamelWidth * boardH) / 1000000;
+        const baseArea = (boardW * boardH) / 1000000;
+
+        const edgeCost = edgeMb * edgePrice;
+        const lamelBoardCost = lamelArea * boardPrice;
+        const baseBoardCost = baseArea * baseBoardPrice;
+        const total = edgeCost + lamelBoardCost + baseBoardCost;
+
+        document.getElementById('edgeMbQty').textContent = fmtPl(edgeMb, 1) + ' mb';
+        document.getElementById('lamelAreaQty').textContent = fmtPl(lamelArea, 2) + ' m²';
+        document.getElementById('baseAreaQty').textContent = fmtPl(baseArea, 2) + ' m²';
+
+        document.getElementById('edgeCostResult').textContent = fmtPln(edgeCost);
+        document.getElementById('boardCostResult').textContent = fmtPln(lamelBoardCost);
+        document.getElementById('baseBoardCostResult').textContent = fmtPln(baseBoardCost);
+        document.getElementById('totalCostResult').textContent = fmtPln(total);
+    }
+
+    function updateDisplay(count, spacing, startEdge, endEdge, boardW, boardH, lamelaW) {
+        closeDimEditor();
+        const svg = document.getElementById('visualizer');
+        svg.innerHTML = '';
+        const frontLayer = document.createElementNS(SVG_NS, 'g');
+        frontLayer.setAttribute('class', 'dim-front-layer');
+        const isCountMode = document.getElementById('mode').value === 'count';
+        const p = 250;
+        svg.setAttribute('viewBox', `${-p} ${-p} ${boardW + p * 2} ${boardH + p * 3.5}`);
+
+        const dimColor = "#667eea";
+        const dimFontSize = 40;
+
+        const defs = document.createElementNS(SVG_NS, "defs");
+        const createMarker = (id, points, fill) => {
+            const marker = document.createElementNS(SVG_NS, "marker");
+            marker.setAttribute("id", id);
+            marker.setAttribute("markerWidth", "10");
+            marker.setAttribute("markerHeight", "7");
+            marker.setAttribute("refX", "0");
+            marker.setAttribute("refY", "3.5");
+            marker.setAttribute("orient", "auto");
+            const polygon = document.createElementNS(SVG_NS, "polygon");
+            polygon.setAttribute("points", points);
+            polygon.setAttribute("fill", fill);
+            marker.appendChild(polygon);
+            defs.appendChild(marker);
+        };
+        createMarker("arrow-right", "0 0, 10 3.5, 0 7", dimColor);
+        createMarker("arrow-left", "10 0, 0 3.5, 10 7", dimColor);
+        createMarker("arrow-up", "0 7, 3.5 0, 7 7", dimColor);
+        createMarker("arrow-down", "0 0, 7 3.5, 0 7", dimColor);
+        createMarker("arrow-right-green", "0 0, 10 3.5, 0 7", COLOR_EDIT);
+        createMarker("arrow-left-green", "10 0, 0 3.5, 10 7", COLOR_EDIT);
+        createMarker("arrow-up-green", "0 7, 3.5 0, 7 7", COLOR_EDIT);
+        createMarker("arrow-down-green", "0 0, 7 3.5, 0 7", COLOR_EDIT);
+        svg.appendChild(defs);
+
+        const addLine = (x1, y1, x2, y2, sw = 1, color = dimColor) => {
+            const line = document.createElementNS(SVG_NS, "line");
+            line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+            line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+            line.setAttribute("stroke", color);
+            line.setAttribute("stroke-width", sw);
+            svg.appendChild(line);
+            return line;
+        };
+
+        const addText = (x, y, text, size = 40, weight = "bold", anchor = "middle", color = dimColor) => {
+            const txt = document.createElementNS(SVG_NS, "text");
+            txt.setAttribute("x", x); txt.setAttribute("y", y);
+            txt.setAttribute("fill", color);
+            txt.setAttribute("font-size", size);
+            txt.setAttribute("font-weight", weight);
+            txt.setAttribute("font-family", "sans-serif");
+            txt.setAttribute("text-anchor", anchor);
+            txt.textContent = text;
+            svg.appendChild(txt);
+            return txt;
+        };
+
+        const rect = (x, y, w, h, fill, stroke, sw) => {
+            const r = document.createElementNS(SVG_NS, "rect");
+            r.setAttribute("x", x); r.setAttribute("y", y);
+            r.setAttribute("width", w); r.setAttribute("height", h);
+            r.setAttribute("fill", fill);
+            if (stroke) { r.setAttribute("stroke", stroke); r.setAttribute("stroke-width", sw); }
+            return r;
+        };
+        svg.appendChild(rect(0, 0, boardW, boardH, "#e3d5c8", "#333", 3));
+
+        for (let i = 0; i < count; i++) {
+            const x = startEdge + (i * (lamelaW + spacing));
+            svg.appendChild(rect(x, 0, lamelaW, boardH, "#3a4a6a", null, 0));
+        }
+
+        // === SZEROKOŚĆ — etykieta na osi linii wymiarowej (linie po sync bbox) ===
+        const dimY = -110;
+        const widthTextX = boardW / 2;
+        const widthLabel = `${Math.round(boardW)} mm`;
+        addCircleBadge(frontLayer, {
+            field: 'boardW',
+            cx: widthTextX,
+            cy: dimY,
+            displayValue: Math.round(boardW),
+            subLabel: 'mm',
+            boardW, boardH,
+            sizeTier: 'md',
+            variant: isCountMode ? 'edit' : 'result',
+            ariaLabel: `Edytuj szerokość: ${Math.round(boardW)} mm`
+        });
+
+        // === WYSOKOŚĆ — etykieta na osi linii wymiarowej ===
+        const dimX = -110;
+        const heightTextY = boardH / 2;
+
+        addCircleBadge(frontLayer, {
+            field: 'boardH',
+            cx: dimX,
+            cy: heightTextY,
+            displayValue: boardH,
+            subLabel: 'mm',
+            boardW, boardH,
+            sizeTier: 'md',
+            variant: 'edit',
+            ariaLabel: `Edytuj wysokość: ${boardH} mm`
+        });
+
+        // === MARGINESY start / koniec — dół, wartości mm ===
+        const baseY = boardH + 80;
+
+        if (count > 0 || startEdge > 0) {
+            addLine(0, baseY, startEdge, baseY, 1.5, COLOR_EDIT);
+            addLine(0, baseY, 0, baseY + 20, 2, COLOR_EDIT);
+            addLine(startEdge, baseY, startEdge, baseY + 20, 2, COLOR_EDIT);
+            addCircleBadge(frontLayer, {
+                field: 'startEdge',
+                cx: startEdge / 2,
+                cy: baseY + 36,
+                displayValue: startEdge,
+                subLabel: 'mm',
+                boardW, boardH,
+                sizeTier: 'sm',
+                variant: 'edit',
+                ariaLabel: `Edytuj margines startu: ${startEdge} mm`
+            });
+        }
+
+        if (count > 0 || endEdge > 0) {
+            const e2X1 = boardW - endEdge;
+            addLine(e2X1, baseY, boardW, baseY, 1.5, COLOR_EDIT);
+            addLine(e2X1, baseY, e2X1, baseY + 20, 2, COLOR_EDIT);
+            addLine(boardW, baseY, boardW, baseY + 20, 2, COLOR_EDIT);
+            addCircleBadge(frontLayer, {
+                field: 'endEdge',
+                cx: boardW - endEdge / 2,
+                cy: baseY + 36,
+                displayValue: endEdge.toFixed(1),
+                subLabel: 'mm',
+                boardW, boardH,
+                sizeTier: 'sm',
+                variant: isCountMode ? 'result' : 'edit',
+                ariaLabel: `Edytuj margines końca: ${endEdge.toFixed(1)} mm`
+            });
+        }
+
+        // === GRUBOŚĆ L + ODSTĘP S — większe kółka, przesunięte w prawo ===
+        const paramY = boardH * 0.17;
+        const pairTier = 'md';
+        const pairScale = 1.08;
+        const pairR = badgeRadius(boardW, boardH, pairTier, pairScale);
+        const edgePad = 22;
+        const pairSep = 16;
+
+        if (count > 0) {
+            if (count >= 2) {
+                // Przy ≥3 lamelach — para nad 2. szczeliną (dalej w prawo); inaczej przesunięcie od 1.
+                let tickX1, tickX2;
+                if (count >= 3) {
+                    tickX1 = startEdge + 2 * lamelaW + spacing;
+                    tickX2 = tickX1 + spacing;
+                } else {
+                    tickX1 = startEdge + lamelaW;
+                    tickX2 = tickX1 + spacing;
+                }
+                const pairCenterX = (tickX1 + tickX2) / 2;
+
+                let lamCx = pairCenterX - pairR - pairSep * 0.5;
+                let spacingCx = pairCenterX + pairR + pairSep * 0.5;
+                const minLamCx = pairR + edgePad;
+                if (lamCx < minLamCx) {
+                    const shift = minLamCx - lamCx;
+                    lamCx += shift;
+                    spacingCx += shift;
+                }
+
+                const gapTick = Math.min(44, boardH * 0.055);
+                const tickY = paramY + pairR * 0.62;
+                addLine(tickX1, tickY, tickX1, tickY + gapTick, 1.5, COLOR_EDIT);
+                addLine(tickX2, tickY, tickX2, tickY + gapTick, 1.5, COLOR_EDIT);
+                addLine(tickX1, tickY + gapTick * 0.55, tickX2, tickY + gapTick * 0.55, 1, COLOR_EDIT);
+
+                addCircleBadge(frontLayer, {
+                    field: 'lamelaW',
+                    cx: lamCx,
+                    cy: paramY,
+                    displayValue: lamelaW,
+                    subLabel: 'mm',
+                    boardW, boardH,
+                    sizeTier: pairTier,
+                    radiusScale: pairScale,
+                    variant: 'edit',
+                    ariaLabel: `Edytuj grubość lameli: ${lamelaW} mm`
+                });
+                addCircleBadge(frontLayer, {
+                    field: 'spacing',
+                    cx: spacingCx,
+                    cy: paramY,
+                    displayValue: spacing,
+                    subLabel: 'mm',
+                    boardW, boardH,
+                    sizeTier: pairTier,
+                    radiusScale: pairScale,
+                    variant: 'edit',
+                    ariaLabel: `Edytuj odstęp: ${spacing} mm`
+                });
+            } else {
+                const lamCx = Math.max(pairR + edgePad, startEdge + lamelaW + pairR * 0.45);
+                addCircleBadge(frontLayer, {
+                    field: 'lamelaW',
+                    cx: lamCx,
+                    cy: paramY,
+                    displayValue: lamelaW,
+                    subLabel: 'mm',
+                    boardW, boardH,
+                    sizeTier: pairTier,
+                    radiusScale: pairScale,
+                    variant: 'edit',
+                    ariaLabel: `Edytuj grubość lameli: ${lamelaW} mm`
+                });
+            }
+        }
+
+        // === ILOŚĆ — środek płyty (białe = wynik, zielone = do wpisania) ===
+        const countCx = boardW / 2;
+        const countCy = boardH / 2;
+        addCircleBadge(frontLayer, {
+            field: 'count',
+            cx: countCx,
+            cy: countCy,
+            displayValue: count,
+            subLabel: 'szt.',
+            boardW, boardH,
+            sizeTier: 'lg',
+            variant: isCountMode ? 'result' : 'edit',
+            ariaLabel: `Edytuj ilość lameli: ${count}`
+        });
+
+        // === TRYB — zielony prostokąt (jak typ w rogowej) na środku ===
+        var modeLabel = isCountMode ? 'Ile wejdzie' : 'Szer. płyty';
+        addEditableDim(frontLayer, {
+            field: 'mode',
+            x: boardW / 2,
+            y: boardH / 2 + 160,
+            text: 'Tryb: ' + modeLabel,
+            fontSize: 36,
+            hitPadX: 24
+        });
+
+        svg.appendChild(frontLayer);
+
+        setTimeout(() => {
+            syncAllDimHitRects(svg);
+            drawGabaritDimLines(svg, frontLayer, boardW, boardH, dimX, dimY);
+        }, 10);
+    }
+
+    window.calculate = calculate;
+    window.calculateCosts = calculateCosts;
+    window.updateUI = updateUI;
+    window.onSlatLengthInput = onSlatLengthInput;
+
+    updateUI();
+
+    document.getElementById('dimEditorOk').addEventListener('click', commitDimEditor);
+    document.getElementById('dimEditorCancel').addEventListener('click', closeDimEditor);
+    document.getElementById('dimEditorInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') commitDimEditor();
+        if (e.key === 'Escape') closeDimEditor();
+    });
+    document.getElementById('dimEditorSelect').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') commitDimEditor();
+        if (e.key === 'Escape') closeDimEditor();
+    });
+    document.getElementById('svgContainer').addEventListener('click', (e) => {
+        if (!isDimUiTarget(e.target)) closeDimEditor();
+    });
+    window.addEventListener('resize', () => setTimeout(() => {
+        const svg = document.getElementById('visualizer');
+        const frontLayer = svg.querySelector('.dim-front-layer');
+        if (!frontLayer) return;
+        syncAllDimHitRects(svg);
+        const boardW = parseFloat(document.getElementById('boardW').value) || 0;
+        const boardH = parseFloat(document.getElementById('boardH').value) || 0;
+        drawGabaritDimLines(svg, frontLayer, boardW, boardH, -110, -110);
+    }, 100));
+</script>
+<script>if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js')}</script>
+</body>
+</html>

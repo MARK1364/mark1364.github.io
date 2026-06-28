@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#D8D3CB">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23D8D3CB' rx='12'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-size='32' font-weight='800' font-family='sans-serif' fill='%235C4F72'%3ESP%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23D8D3CB' rx='32'/%3E%3Ctext x='96' y='118' text-anchor='middle' font-size='100' font-weight='800' font-family='sans-serif' fill='%235C4F72'%3ESP%3C/text%3E%3C/svg%3E">
+    <title>Stolarnia PRO — Narzędzia</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #E8E4DD;
+            color: #3D3A36;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .app-header {
+            background: #D8D3CB;
+            border-bottom: 1px solid #C4BFB6;
+            flex-shrink: 0;
+            z-index: 100;
+            padding-top: env(safe-area-inset-top);
+        }
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 0 20px;
+            height: 52px;
+        }
+        .logo {
+            font-size: 1.15em;
+            font-weight: 800;
+            color: #5C4F72;
+            letter-spacing: 1px;
+        }
+        .logo span { color: #6E6962; font-weight: 400; font-size: 0.72em; margin-left: 6px; }
+
+        /* Zakładki główne — desktop (góra) */
+        .main-tabs-top {
+            display: flex;
+            gap: 6px;
+        }
+        .main-tabs-top .main-tab {
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+
+        /* Zakładki główne — mobile (dół) */
+        .main-tabs-bottom {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #D8D3CB;
+            border-top: 1px solid #C4BFB6;
+            padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+            z-index: 200;
+            justify-content: space-around;
+            gap: 4px;
+        }
+        .main-tabs-bottom .main-tab {
+            flex: 1;
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px 4px;
+            font-size: 0.72em;
+            min-height: 52px;
+        }
+        .main-tabs-bottom .main-tab .ico { font-size: 1.35em; line-height: 1; }
+
+        .main-tab {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            background: transparent;
+            color: #6E6962;
+            border-radius: 10px;
+            transition: all 0.2s;
+            font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .main-tab:hover { background: rgba(92, 79, 114, 0.12); color: #3D3A36; }
+        .main-tab.active { background: #7A6B8F; color: #fff; }
+
+        .sub-tabs-bar {
+            background: #E0DBD3;
+            padding: 0 16px;
+            display: none;
+            gap: 8px;
+            align-items: center;
+            height: 44px;
+            border-bottom: 1px solid #C9C4BB;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .sub-tabs-bar::-webkit-scrollbar { display: none; }
+        .sub-tabs-bar.visible { display: flex; }
+
+        .sub-tab {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            border: 1px solid #C9C4BB;
+            cursor: pointer;
+            background: #F4F1EB;
+            color: #5A5550;
+            font-size: 0.85em;
+            border-radius: 20px;
+            transition: all 0.2s;
+            font-family: inherit;
+            white-space: nowrap;
+            min-height: 36px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .sub-tab.active { background: #7A6B8F; color: #fff; border-color: #7A6B8F; }
+
+        .app-body {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+        .panel {
+            position: absolute;
+            inset: 0;
+            display: none;
+        }
+        .panel.active { display: flex; flex-direction: column; }
+
+        .iframe-wrap {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+        .iframe-wrap iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
+        .iframe-wrap iframe.active { display: block; }
+
+        /* === MOBILE === */
+        @media (max-width: 768px) {
+            body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+
+            .header-top {
+                justify-content: center;
+                padding: 0 12px;
+                height: 46px;
+            }
+            .logo span { display: none; }
+            .main-tabs-top { display: none; }
+            .main-tabs-bottom { display: flex; }
+
+            .sub-tabs-bar {
+                padding: 8px 12px;
+                height: auto;
+                min-height: 48px;
+            }
+            .sub-tab {
+                padding: 10px 16px;
+                font-size: 0.88em;
+                min-height: 40px;
+            }
+
+            .app-body {
+                /* miejsce na dolny pasek nawigacji */
+            }
+        }
+
+        @media (min-width: 769px) {
+            .main-tabs-bottom { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="app-header">
+    <div class="header-top">
+        <div class="logo">🪚 Stolarnia PRO <span>narzędzia stolarskie</span></div>
+        <nav class="main-tabs-top">
+            <button class="main-tab active" data-panel="kalkulator">🧮 Kalkulator</button>
+            <button class="main-tab" data-panel="render">🎨 Render</button>
+            <button class="main-tab" data-panel="harmonogram">📅 Harmonogram</button>
+        </nav>
+    </div>
+    <div class="sub-tabs-bar visible" id="sub-tabs">
+        <button class="sub-tab active" data-calc="giecie">📐 Gięcie</button>
+        <button class="sub-tab" data-calc="lamele">🪵 Lamele</button>
+        <button class="sub-tab" data-calc="polki">📦 Półki</button>
+        <button class="sub-tab" data-calc="nesting">🔲 Nesting</button>
+        <button class="sub-tab" data-calc="antaro">🗄 Antaro</button>
+        <button class="sub-tab" data-calc="sevroll">📥 Sevroll</button>
+        <button class="sub-tab" data-calc="rogowa">📐 Rogowa</button>
+    </div>
+</header>
+
+<main class="app-body">
+    <section class="panel active" id="panel-kalkulator">
+        <div class="iframe-wrap">
+            <iframe id="frame-giecie" src="giecie.html" class="active" title="Gięcie MDF"></iframe>
+            <iframe id="frame-lamele" src="lamele.html" title="Lamele"></iframe>
+            <iframe id="frame-polki" src="polki.html" title="Półki"></iframe>
+            <iframe id="frame-nesting" src="nesting/index.html" title="Nesting — Rozkrój"></iframe>
+            <iframe id="frame-antaro" src="antaro.html" title="Blum Antaro — dno i tył"></iframe>
+            <iframe id="frame-sevroll" src="sevroll.html" title="Sevroll Box 3D — dno i tył"></iframe>
+            <iframe id="frame-rogowa" src="rogowa.html" title="Szafka rogowa"></iframe>
+        </div>
+    </section>
+    <section class="panel" id="panel-render">
+        <div class="iframe-wrap">
+            <iframe id="frame-render" src="render.html?embed=1" title="Render AI"></iframe>
+        </div>
+    </section>
+    <section class="panel" id="panel-harmonogram">
+        <div class="iframe-wrap">
+            <iframe id="frame-harmonogram" src="harmonogram.html?embed=1" title="Harmonogram"></iframe>
+        </div>
+    </section>
+</main>
+
+<nav class="main-tabs-bottom" aria-label="Nawigacja główna">
+    <button class="main-tab active" data-panel="kalkulator"><span class="ico">🧮</span>Kalkulator</button>
+    <button class="main-tab" data-panel="render"><span class="ico">🎨</span>Render</button>
+    <button class="main-tab" data-panel="harmonogram"><span class="ico">📅</span>Plan</button>
+</nav>
+
+<script>
+    const subTabsBar = document.getElementById('sub-tabs');
+
+    function switchMain(panel) {
+        document.querySelectorAll('.main-tab[data-panel]').forEach(t =>
+            t.classList.toggle('active', t.dataset.panel === panel));
+        document.querySelectorAll('.panel').forEach(p =>
+            p.classList.toggle('active', p.id === 'panel-' + panel));
+        subTabsBar.classList.toggle('visible', panel === 'kalkulator');
+        history.replaceState(null, '', '#' + panel);
+    }
+
+    function switchCalc(name) {
+        document.querySelectorAll('#panel-kalkulator .iframe-wrap iframe').forEach(f =>
+            f.classList.toggle('active', f.id === 'frame-' + name));
+        document.querySelectorAll('.sub-tab').forEach(b =>
+            b.classList.toggle('active', b.dataset.calc === name));
+    }
+
+    document.querySelectorAll('.main-tab[data-panel]').forEach(btn => {
+        btn.addEventListener('click', () => switchMain(btn.dataset.panel));
+    });
+
+    document.querySelectorAll('.sub-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            switchCalc(btn.dataset.calc);
+            history.replaceState(null, '', '#kalkulator/' + btn.dataset.calc);
+        });
+    });
+
+    function applyHash() {
+        const hash = (location.hash || '#kalkulator').slice(1);
+        const [main, sub] = hash.split('/');
+        const valid = ['kalkulator', 'render', 'harmonogram'];
+        switchMain(valid.includes(main) ? main : 'kalkulator');
+        if (main === 'kalkulator' && ['giecie', 'lamele', 'polki', 'nesting', 'antaro', 'sevroll', 'rogowa'].includes(sub)) {
+            switchCalc(sub);
+        }
+    }
+
+    window.addEventListener('hashchange', applyHash);
+    applyHash();
+
+    window.addEventListener('message', (event) => {
+        if (!event.data || event.data.type !== 'STOLARNIA_IMPORT_NESTING') return;
+        switchMain('kalkulator');
+        switchCalc('nesting');
+        history.replaceState(null, '', '#kalkulator/nesting');
+        const frame = document.getElementById('frame-nesting');
+        const send = () => {
+            if (frame.contentWindow) frame.contentWindow.postMessage(event.data, '*');
+        };
+        if (frame.contentDocument && frame.contentDocument.readyState === 'complete') {
+            send();
+        } else {
+            frame.addEventListener('load', send, { once: true });
+        }
+    });
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23D8D3CB' rx='12'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-size='32' font-weight='800' font-family='sans-serif' fill='%235C4F72'%3ESP%3C/text%3E%3C/svg%3E">
+  <title>Szafka rogowa — parametry</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #E8E4DD;
+      color: #3D3A36;
+      font-size: 17px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+
+
+    .svg-wrap {
+      flex: 1;
+      position: relative;
+      min-height: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 0;
+      overflow: auto;
+    }
+    .svg-container {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      max-height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .svg-container svg {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      border: 1px solid #C9C4BB;
+      border-radius: 8px;
+      background: #EDE9E2;
+      box-shadow: 0 2px 12px rgba(61, 58, 54, 0.1);
+    }
+
+    /* === DIM EDITOR === */
+    .dim-editor {
+      position: absolute;
+      z-index: 20;
+      background: #FFFCF8;
+      border: 2px solid #7A6B8F;
+      border-radius: 8px;
+      padding: 10px 12px;
+      box-shadow: 0 6px 20px rgba(61, 58, 54, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 160px;
+    }
+    .dim-editor[hidden] { display: none !important; }
+    .dim-editor label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #5C4F72;
+    }
+    .dim-editor input {
+      height: 38px;
+      font-size: 18px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border: 1px solid #C4BFB6;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+    .dim-editor input:focus { outline: 2px solid #7A6B8F; outline-offset: -1px; }
+    .dim-editor-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .dim-editor-actions button {
+      flex: 1;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .dim-editor-ok { background: #7A6B8F; color: #fff; }
+    .dim-editor-ok:hover { filter: brightness(1.08); }
+    .dim-editor-cancel {
+      background: #EDE9E2;
+      color: #5A5550;
+      border: 1px solid #C9C4BB !important;
+    }
+
+    /* === SVG DIM STYLES === */
+    .dim-editable { cursor: pointer; pointer-events: all; }
+    .dim-editable text { pointer-events: none; }
+
+    .dim-editable.dim-green .dim-hit {
+      fill: rgba(16, 185, 129, 0.42);
+      stroke: #10b981;
+      stroke-width: 2.5;
+      animation: rogPulse 2.5s ease-in-out infinite;
+    }
+    .dim-editable.dim-green:hover .dim-hit {
+      fill: rgba(16, 185, 129, 0.5);
+      stroke: #34d399;
+      stroke-width: 3;
+    }
+    .dim-editable.dim-green text {
+      fill: #ffffff;
+      font-weight: 800;
+    }
+
+    .dim-result-board-dim { pointer-events: none; }
+    .dim-result-board-dim text {
+      fill: #3D3A36;
+      font-weight: 800;
+      pointer-events: none;
+    }
+    .dim-result-board-dim .dim-hit-static {
+      fill: rgba(255, 252, 248, 0.96);
+      stroke: #C9C4BB;
+      stroke-width: 2.5;
+      pointer-events: none;
+    }
+
+    .dim-editable.dim-green-badge { cursor: pointer; }
+    .dim-editable.dim-green-badge .dim-badge-ring {
+      fill: rgba(16, 185, 129, 0.38);
+      stroke: #10b981;
+      stroke-width: 3;
+      animation: rogPulse 2.5s ease-in-out infinite;
+      pointer-events: all;
+      cursor: pointer;
+    }
+    .dim-editable.dim-green-badge:hover .dim-badge-ring {
+      fill: rgba(16, 185, 129, 0.55);
+      stroke: #34d399;
+      stroke-width: 3.5;
+      animation-play-state: paused;
+    }
+    .dim-editable.dim-green-badge .dim-badge-num {
+      fill: #ffffff;
+      font-weight: 800;
+      pointer-events: none;
+    }
+    .dim-editable.dim-green-badge .dim-badge-label {
+      fill: #d1fae5;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    .dim-result-badge { pointer-events: none; }
+    .dim-result-badge .dim-badge-ring {
+      fill: rgba(255, 252, 248, 0.96);
+      stroke: #C9C4BB;
+      stroke-width: 2.5;
+    }
+    .dim-result-badge .dim-badge-num {
+      fill: #3D3A36;
+      font-weight: 800;
+      pointer-events: none;
+    }
+    .dim-result-badge .dim-badge-label {
+      fill: #6E6962;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    @keyframes rogPulse {
+      0%, 100% { fill: rgba(16, 185, 129, 0.28); stroke-width: 2.5; }
+      50% { fill: rgba(16, 185, 129, 0.52); stroke-width: 3.5; }
+    }
+
+    .params-hidden { display: none; }
+
+
+  </style>
+</head>
+<body>
+
+
+<input id="lenA" type="hidden" value="880">
+<input id="lenB" type="hidden" value="880">
+<input id="lenC" type="hidden" value="510">
+<input id="lenF" type="hidden" value="510">
+<input id="lenE" type="hidden" value="370">
+<input id="lenD" type="hidden" value="370">
+<input id="lenG" type="hidden" value="19">
+<input id="lenT" type="hidden" value="jednostronna">
+
+<div class="svg-wrap">
+  <div class="svg-container" id="svgContainer">
+    <svg id="visualizer" width="1200" height="1200">
+      <g id="drawLayer" transform="scale(0.55)">
+        <line id="liniaA" stroke="#3D3A36" stroke-width="2"/>
+        <line id="liniaB" stroke="#3D3A36" stroke-width="2"/>
+        <line id="liniaF" stroke="#3D3A36" stroke-width="2"/>
+        <line id="liniaE" stroke="#3D3A36" stroke-width="2"/>
+        <line id="liniaD" stroke="#3D3A36" stroke-width="2"/>
+        <line id="liniaC" stroke="#3D3A36" stroke-width="2"/>
+
+        <rect id="bokC" fill="#7A6B8F" opacity="0.3" />
+        <rect id="bokF" fill="#7A6B8F" opacity="0.3" />
+        <rect id="frontFD" fill="#D4A373" opacity="0.5" />
+        <rect id="frontFE" fill="#D4A373" opacity="0.5" />
+
+        <g id="dimsGroup"></g>
+      </g>
+    </svg>
+
+    <div id="dimEditor" class="dim-editor" hidden>
+      <label id="dimEditorLabel">Wymiar</label>
+      <input type="number" id="dimEditorInput">
+      <select id="dimEditorSelect" hidden>
+        <option value="jednostronna">Rogowa jednostronna</option>
+        <option value="dwustronna-lewa">Rogowa dwustronna lewa</option>
+        <option value="dwustronna-prawa">Rogowa dwustronna prawa</option>
+      </select>
+      <div class="dim-editor-actions">
+        <button type="button" class="dim-editor-cancel" id="dimEditorCancel">Anuluj</button>
+        <button type="button" class="dim-editor-ok" id="dimEditorOk">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const COLOR_EDIT = '#10b981';
+
+let dimEditorField = null;
+
+const EDITABLE_DIMS = {
+  A: { min: 100, max: 3000, step: 1, label: 'Wymiar A (zew. szer.)', unit: ' mm' },
+  B: { min: 100, max: 3000, step: 1, label: 'Wymiar B (zew. wys.)', unit: ' mm' },
+  C: { min: 50, max: 2000, step: 1, label: 'Wymiar C (dół)', unit: ' mm' },
+  F: { min: 50, max: 2000, step: 1, label: 'Wymiar F (prawy bok)', unit: ' mm' },
+
+  E: { min: 0, max: 2000, step: 1, label: 'Wymiar E (górny zwis)', unit: ' mm' },
+  D: { min: 0, max: 2000, step: 1, label: 'Wymiar D (lewy zwis)', unit: ' mm' },
+  G: { min: 4, max: 40, step: 1, label: 'Grubość frontu', unit: ' mm' },
+  T: { min: 1, max: 3, step: 1, label: 'Typ szafki', unit: '' }
+};
+
+function placeHitRectFromElement(rectEl, textEl, padX, padY) {
+  var bbox;
+  try { bbox = textEl.getBBox(); } catch(e) { return false; }
+  if (!bbox || bbox.width < 1 || bbox.height < 1) return false;
+  rectEl.setAttribute('x', bbox.x - padX);
+  rectEl.setAttribute('y', bbox.y - padY);
+  rectEl.setAttribute('width', bbox.width + padX * 2);
+  rectEl.setAttribute('height', bbox.height + padY * 2);
+  return true;
+}
+
+function applyHitRectRound(rectEl) {
+  const w = parseFloat(rectEl.getAttribute('width')) || 0;
+  const h = parseFloat(rectEl.getAttribute('height')) || 0;
+  const rx = Math.min(12, w * 0.2, h * 0.35);
+  rectEl.setAttribute('rx', rx);
+  rectEl.setAttribute('ry', rx);
+}
+
+function syncAllDimHitRects() {
+  document.querySelectorAll('.dim-editable:not(.dim-green-badge), .dim-result-board-dim').forEach(g => {
+    const text = g.querySelector('text');
+    const rect = g.querySelector('.dim-hit, .dim-hit-static');
+    if (!text || !rect) return;
+    const padX = parseFloat(g.dataset.hitPadX || '12');
+    const padY = parseFloat(g.dataset.hitPadY || '10');
+    placeHitRectFromElement(rect, text, padX, padY);
+    applyHitRectRound(rect);
+  });
+}
+
+function openDimEditor(field, anchorEvent) {
+  const cfg = EDITABLE_DIMS[field];
+  const formInput = document.getElementById('len' + field);
+  if (!cfg || !formInput) return;
+
+  dimEditorField = field;
+  const editor = document.getElementById('dimEditor');
+  const editorInput = document.getElementById('dimEditorInput');
+  const editorSelect = document.getElementById('dimEditorSelect');
+  const editorLabel = document.getElementById('dimEditorLabel');
+
+  editorLabel.textContent = field === 'T' ? 'Typ szafki' : cfg.label + (cfg.unit ? ` (${cfg.unit.trim()})` : '');
+
+  if (field === 'T') {
+    editorInput.hidden = true;
+    editorSelect.hidden = false;
+    editorSelect.value = formInput.value;
+  } else {
+    editorSelect.hidden = true;
+    editorInput.hidden = false;
+    editorInput.min = cfg.min;
+    editorInput.max = cfg.max;
+    editorInput.step = cfg.step;
+    editorInput.value = formInput.value;
+  }
+  editor.hidden = false;
+
+  const container = document.getElementById('svgContainer');
+  const rect = container.getBoundingClientRect();
+  const clientX = anchorEvent.clientX ?? (rect.left + rect.width / 2);
+  const clientY = anchorEvent.clientY ?? (rect.top + rect.height / 2);
+  let left = clientX - rect.left + 12;
+  let top = clientY - rect.top - 20;
+  left = Math.max(8, Math.min(left, rect.width - 180));
+  top = Math.max(8, Math.min(top, rect.height - 120));
+  editor.style.left = left + 'px';
+  editor.style.top = top + 'px';
+
+  if (field === 'T') {
+    editorSelect.focus();
+  } else {
+    editorInput.focus();
+    editorInput.select();
+  }
+}
+
+function commitDimEditor() {
+  if (!dimEditorField) return;
+  const formInput = document.getElementById('len' + dimEditorField);
+
+  if (dimEditorField === 'T') {
+    const editorSelect = document.getElementById('dimEditorSelect');
+    formInput.value = editorSelect.value;
+    closeDimEditor();
+    recalc();
+    return;
+  }
+
+  const cfg = EDITABLE_DIMS[dimEditorField];
+  const editorInput = document.getElementById('dimEditorInput');
+  let value = parseFloat(editorInput.value);
+  if (Number.isNaN(value)) { editorInput.focus(); return; }
+  value = Math.max(cfg.min, Math.min(cfg.max, value));
+  formInput.value = String(Math.round(value));
+
+  // Propagate E/D to C/F or vice versa
+  const A = parseFloat(document.getElementById('lenA').value) || 880;
+  const B = parseFloat(document.getElementById('lenB').value) || 880;
+  if (dimEditorField === 'E') {
+    document.getElementById('lenC').value = String(Math.round(Math.max(0, A - value)));
+  } else if (dimEditorField === 'D') {
+    document.getElementById('lenF').value = String(Math.round(Math.max(0, B - value)));
+  }
+
+  closeDimEditor();
+  recalc();
+}
+
+function closeDimEditor() {
+  document.getElementById('dimEditor').hidden = true;
+  dimEditorField = null;
+}
+
+function isDimUiTarget(node) {
+  while (node && node !== document) {
+    if (node.classList && (node.classList.contains('dim-editable') || node.classList.contains('dim-result-board-dim'))) return true;
+    if (node.id === 'dimEditor') return true;
+    node = node.parentNode;
+  }
+  return false;
+}
+
+function addEditableDim(layer, opts) {
+  const g = document.createElementNS(SVG_NS, 'g');
+  g.setAttribute('class', 'dim-editable dim-green' + (opts.className ? ' ' + opts.className : ''));
+  g.setAttribute('data-field', opts.field);
+  g.setAttribute('role', 'button');
+  g.setAttribute('tabindex', '0');
+  g.dataset.hitPadX = String(opts.hitPadX ?? 12);
+  g.dataset.hitPadY = String(opts.hitPadY ?? 10);
+
+  const hit = document.createElementNS(SVG_NS, 'rect');
+  hit.setAttribute('class', 'dim-hit');
+  g.appendChild(hit);
+
+  const text = document.createElementNS(SVG_NS, 'text');
+  text.setAttribute('x', opts.x);
+  text.setAttribute('y', opts.y);
+  text.setAttribute('font-size', opts.fontSize || 36);
+  text.setAttribute('font-weight', '800');
+  text.setAttribute('font-family', 'sans-serif');
+  text.setAttribute('text-anchor', opts.anchor || 'middle');
+  text.setAttribute('dominant-baseline', 'middle');
+  if (opts.textTransform) text.setAttribute('transform', opts.textTransform);
+  text.textContent = opts.text;
+  g.appendChild(text);
+
+  layer.appendChild(g);
+
+  const activate = function(e) { e.preventDefault(); e.stopPropagation(); openDimEditor(opts.field, e); };
+  g.addEventListener('pointerdown', activate);
+  g.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDimEditor(opts.field, e); }
+  });
+}
+
+function addResultDim(layer, opts) {
+  const g = document.createElementNS(SVG_NS, 'g');
+  g.setAttribute('class', 'dim-result-board-dim');
+  if (opts.field) g.setAttribute('data-field', opts.field);
+  g.dataset.hitPadX = String(opts.hitPadX ?? 12);
+  g.dataset.hitPadY = String(opts.hitPadY ?? 10);
+  if (opts.groupTransform) g.setAttribute('transform', opts.groupTransform);
+
+  const hit = document.createElementNS(SVG_NS, 'rect');
+  hit.setAttribute('class', 'dim-hit-static');
+  g.appendChild(hit);
+
+  const text = document.createElementNS(SVG_NS, 'text');
+  text.setAttribute('x', opts.x);
+  text.setAttribute('y', opts.y);
+  text.setAttribute('font-size', opts.fontSize || 36);
+  text.setAttribute('font-weight', '800');
+  text.setAttribute('font-family', 'sans-serif');
+  text.setAttribute('text-anchor', opts.anchor || 'middle');
+  text.setAttribute('dominant-baseline', 'middle');
+  if (opts.textTransform) text.setAttribute('transform', opts.textTransform);
+  text.textContent = opts.text;
+  g.appendChild(text);
+
+  layer.appendChild(g);
+}
+
+function draw() {
+  const svg = document.getElementById('visualizer');
+  const dimsGroup = document.getElementById('dimsGroup');
+  dimsGroup.innerHTML = '';
+
+  const A = parseFloat(document.getElementById('lenA').value) || 880;
+  const B = parseFloat(document.getElementById('lenB').value) || 880;
+  const C = parseFloat(document.getElementById('lenC').value) || 510;
+  const F = parseFloat(document.getElementById('lenF').value) || 510;
+  const E = Math.max(0, A - C);
+  const D = Math.max(0, B - F);
+  document.getElementById('lenE').value = String(Math.round(E));
+  document.getElementById('lenD').value = String(Math.round(D));
+
+  const grubosc = parseInt(document.getElementById('lenG').value);
+  const typ = document.getElementById('lenT').value;
+
+  const x0 = 450, y0 = 450;
+  const p1 = [x0, y0];
+  const p2 = [x0 + A, y0];
+  const p3 = [x0 + A, y0 + F];
+  const p4 = [x0 + C, y0 + F];
+  const p5 = [x0 + C, y0 + B];
+  const p6 = [x0, y0 + B];
+
+  // Lines
+  const setLine = function(id, x1,y1,x2,y2) {
+    const el = document.getElementById(id);
+    el.setAttribute('x1', x1); el.setAttribute('y1', y1);
+    el.setAttribute('x2', x2); el.setAttribute('y2', y2);
+  };
+  setLine('liniaA', p1[0],p1[1],p2[0],p2[1]);
+  setLine('liniaB', p1[0],p1[1],p6[0],p6[1]);
+  setLine('liniaF', p2[0],p2[1],p3[0],p3[1]);
+  setLine('liniaE', p3[0],p3[1],p4[0],p4[1]);
+  setLine('liniaD', p4[0],p4[1],p5[0],p5[1]);
+  setLine('liniaC', p5[0],p5[1],p6[0],p6[1]);
+
+  // Boczek C (bottom horizontal, 18mm thick going up)
+  var boczekGrub = 18;
+  var bokCEl = document.getElementById('bokC');
+  bokCEl.setAttribute('x', p6[0]);
+  bokCEl.setAttribute('y', p6[1] - boczekGrub);
+  bokCEl.setAttribute('width', C);
+  bokCEl.setAttribute('height', boczekGrub);
+
+  // Boczek F (right vertical, 18mm thick going left)
+  var bokFEl = document.getElementById('bokF');
+  bokFEl.setAttribute('x', p2[0] - boczekGrub);
+  bokFEl.setAttribute('y', p2[1]);
+  bokFEl.setAttribute('width', boczekGrub);
+  bokFEl.setAttribute('height', F);
+
+  // Fronts
+  const offset2 = 1;
+  let pFE, pFD;
+  if (typ === 'jednostronna') {
+    pFE = grubosc === 18 ? 21 : 22;
+    pFD = grubosc === 18 ? 21 : 22;
+  } else if (typ === 'dwustronna-lewa') {
+    pFE = 1 + grubosc + 4;
+    pFD = 4;
+  } else {
+    pFE = 4;
+    pFD = 1 + grubosc + 4;
+  }
+
+  const dxE = p4[0] - p3[0], dyE = p4[1] - p3[1];
+  const lenEline = Math.sqrt(dxE*dxE + dyE*dyE);
+  const uxE = dxE/lenEline, uyE = dyE/lenEline;
+  const nxE = uyE, nyE = -uxE;
+  const feX = p4[0] + nxE*offset2 - uxE*pFE;
+  const feY = p4[1] + nyE*offset2 - uyE*pFE;
+  const feLen = Math.max(0, lenEline - pFE - 2);
+
+  const feEl = document.getElementById('frontFE');
+  feEl.setAttribute('x', feX); feEl.setAttribute('y', feY);
+  feEl.setAttribute('width', feLen); feEl.setAttribute('height', grubosc);
+
+  const dxD = p5[0]-p4[0], dyD = p5[1]-p4[1];
+  const lenDline = Math.sqrt(dxD*dxD + dyD*dyD);
+  const uxD = dxD/lenDline, uyD = dyD/lenDline;
+  const nxD = uyD, nyD = -uxD;
+  const fdX = p4[0] + nxD*offset2 + uxD*pFD;
+  const fdY = p4[1] + nyD*offset2 + uyD*pFD;
+  const fdLen = Math.max(0, lenDline - pFD - 2);
+
+  const fdEl = document.getElementById('frontFD');
+  fdEl.setAttribute('x', fdX); fdEl.setAttribute('y', fdY);
+  fdEl.setAttribute('width', grubosc); fdEl.setAttribute('height', fdLen);
+
+  // Dimension labels
+  const mid = function(a,b) { return [(a[0]+b[0])/2, (a[1]+b[1])/2]; };
+  const labelOpts = function(field, midp, offX, offY, txt, transform) {
+    return {
+      field: field, x: midp[0]+offX, y: midp[1]+offY,
+      text: txt, fontSize: 36, anchor: 'middle', textTransform: transform
+    };
+  };
+
+  // All dimension labels are green/editable
+  var m = mid(p1, p2);
+  // White result badge (big number, small mm below)
+  function addWhiteBadge(cx, cy, val) {
+    var g = document.createElementNS(SVG_NS, 'g');
+    g.setAttribute('class', 'dim-result-board-dim');
+    var c = document.createElementNS(SVG_NS, 'circle');
+    c.setAttribute('cx', cx); c.setAttribute('cy', cy);
+    c.setAttribute('r', 40);
+    c.setAttribute('fill', '#fff');
+    c.setAttribute('stroke', '#C4BFB6');
+    c.setAttribute('stroke-width', '2');
+    g.appendChild(c);
+    var t = document.createElementNS(SVG_NS, 'text');
+    t.setAttribute('x', cx); t.setAttribute('y', cy);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('dominant-baseline', 'middle');
+    t.setAttribute('font-family', 'sans-serif');
+    var n = document.createElementNS(SVG_NS, 'tspan');
+    n.setAttribute('x', cx); n.setAttribute('dy', '-8');
+    n.setAttribute('font-size', '30'); n.setAttribute('font-weight', '700');
+    n.setAttribute('fill', '#3D3A36');
+    n.textContent = val;
+    t.appendChild(n);
+    var u = document.createElementNS(SVG_NS, 'tspan');
+    u.setAttribute('x', cx); u.setAttribute('dy', '20');
+    u.setAttribute('font-size', '20'); u.setAttribute('font-weight', '400');
+    u.setAttribute('fill', '#6B6660');
+    u.textContent = 'mm';
+    t.appendChild(u);
+    g.appendChild(t);
+    dimsGroup.appendChild(g);
+  }
+  // Green editable badge (circle)
+  function addGreenBadge(cx, cy, val, field) {
+    var g = document.createElementNS(SVG_NS, 'g');
+    g.setAttribute('class', 'dim-editable dim-green-badge');
+    g.setAttribute('data-field', field);
+    g.setAttribute('role', 'button');
+    g.setAttribute('tabindex', '0');
+    var c = document.createElementNS(SVG_NS, 'circle');
+    c.setAttribute('class', 'dim-badge-ring');
+    c.setAttribute('cx', cx); c.setAttribute('cy', cy);
+    c.setAttribute('r', 45);
+    g.appendChild(c);
+    var t = document.createElementNS(SVG_NS, 'text');
+    t.setAttribute('x', cx); t.setAttribute('y', cy);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('dominant-baseline', 'middle');
+    t.setAttribute('font-family', 'sans-serif');
+    var n = document.createElementNS(SVG_NS, 'tspan');
+    n.setAttribute('class', 'dim-badge-num');
+    n.setAttribute('x', cx); n.setAttribute('dy', '-8');
+    n.setAttribute('font-size', '32');
+    n.textContent = val;
+    t.appendChild(n);
+    var u = document.createElementNS(SVG_NS, 'tspan');
+    u.setAttribute('class', 'dim-badge-label');
+    u.setAttribute('x', cx); u.setAttribute('dy', '22');
+    u.setAttribute('font-size', '18');
+    u.textContent = 'mm';
+    t.appendChild(u);
+    g.appendChild(t);
+    var activate = function(e) { e.preventDefault(); e.stopPropagation(); openDimEditor(field, e); };
+    g.addEventListener('pointerdown', activate);
+    g.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDimEditor(field, e); }
+    });
+    dimsGroup.appendChild(g);
+  }
+  addWhiteBadge(m[0], m[1] + 42, A - 18);
+  addGreenBadge(m[0], m[1] - 45, A, 'A');
+
+  m = mid(p1, p6);
+  addGreenBadge(m[0] - 48, m[1], B, 'B');
+  addWhiteBadge(m[0] + 42, m[1], B - 18);
+
+  m = mid(p5, p6);
+  addGreenBadge(m[0], m[1] + 48, C, 'C');
+
+  m = mid(p2, p3);
+  addGreenBadge(m[0] + 48, m[1], F, 'F');
+
+  m = mid(p3, p4);
+  addGreenBadge(m[0] + 20, m[1] - 64, E, 'E');
+
+  m = mid(p4, p5);
+  addGreenBadge(m[0] - 55, m[1], D, 'D');
+
+  // Type label (green editable) inside cabinet
+  var typLabels = { 'jednostronna': 'Jednostronna', 'dwustronna-lewa': 'Dwustronna lewa', 'dwustronna-prawa': 'Dwustronna prawa' };
+  addEditableDim(dimsGroup, { field: 'T', x: x0 + A * 0.5, y: y0 + B * 0.3, text: 'Typ: ' + (typLabels[typ] || typ), fontSize: 24, hitPadX: 24 });
+
+  // Front labels (white badges) — tangent to front edge from outside
+  var feMid = [feX + feLen / 2, feY + grubosc / 2];
+  addWhiteBadge(feX + feLen / 2, feY + grubosc + 40, Math.round(feLen));
+
+  addWhiteBadge(fdX + grubosc + 40, fdY + fdLen / 2, Math.round(fdLen));
+
+  // Green editable badge for front thickness
+  var gBadge = document.createElementNS(SVG_NS, 'g');
+  gBadge.setAttribute('class', 'dim-editable');
+  gBadge.setAttribute('data-field', 'G');
+  gBadge.setAttribute('role', 'button');
+  gBadge.setAttribute('tabindex', '0');
+  var gCircle = document.createElementNS(SVG_NS, 'circle');
+  gCircle.setAttribute('cx', feMid[0] - 78);
+  gCircle.setAttribute('cy', feMid[1]);
+  gCircle.setAttribute('r', '26');
+  gCircle.setAttribute('fill', COLOR_EDIT);
+  gCircle.setAttribute('stroke', '#fff');
+  gCircle.setAttribute('stroke-width', '3');
+  gBadge.appendChild(gCircle);
+  var gText = document.createElementNS(SVG_NS, 'text');
+  gText.setAttribute('x', feMid[0] - 78);
+  gText.setAttribute('y', feMid[1]+1);
+  gText.setAttribute('font-size', '18');
+  gText.setAttribute('font-weight', '800');
+  gText.setAttribute('font-family', 'sans-serif');
+  gText.setAttribute('text-anchor', 'middle');
+  gText.setAttribute('dominant-baseline', 'middle');
+  gText.setAttribute('fill', '#fff');
+  gText.textContent = grubosc;
+  gBadge.appendChild(gText);
+  var activate = function(e) { e.preventDefault(); e.stopPropagation(); openDimEditor('G', e); };
+  gBadge.addEventListener('pointerdown', activate);
+  gBadge.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDimEditor('G', e); }
+  });
+  dimsGroup.appendChild(gBadge);
+
+  // Dynamic viewBox centered on drawing
+  var scale = parseFloat(document.querySelector('#drawLayer').getAttribute('transform').match(/scale\(([\d.]+)\)/)[1]);
+  var padding = 600;
+  var extentX = (x0 + A) * scale;
+  var extentY = (y0 + B) * scale;
+  var vbSize = Math.max(extentX, extentY) + padding;
+  var centerX = (x0 + A / 2) * scale;
+  var centerY = (y0 + B / 2) * scale;
+  var vbOffsetX = centerX - vbSize / 2;
+  var vbOffsetY = centerY - vbSize / 2 + 300;
+  svg.setAttribute('viewBox', vbOffsetX + ' ' + vbOffsetY + ' ' + vbSize + ' ' + vbSize);
+
+  // Sync hit rects after a short delay
+  setTimeout(function() { syncAllDimHitRects(); }, 10);
+}
+
+function recalc() {
+  draw();
+}
+
+// Event wiring
+document.getElementById('dimEditorOk').addEventListener('click', commitDimEditor);
+document.getElementById('dimEditorCancel').addEventListener('click', closeDimEditor);
+document.getElementById('dimEditorInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') commitDimEditor();
+  if (e.key === 'Escape') closeDimEditor();
+});
+
+document.getElementById('svgContainer').addEventListener('click', function(e) {
+  if (!isDimUiTarget(e.target)) closeDimEditor();
+});
+
+window.addEventListener('resize', function() {
+  setTimeout(function() {
+    syncAllDimHitRects();
+  }, 100);
+});
+
+// Trigger recalc on any input/select change
+document.querySelectorAll('#lenA, #lenB, #lenC, #lenF, #lenE, #lenD, #lenG, #lenT').forEach(function(el) {
+  el.addEventListener('input', recalc);
+  el.addEventListener('change', recalc);
+});
+
+draw();
+</script>
+<script>if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js')}</script>
+
+</body>
+</html>

@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blum Antaro — tabela formatek</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #E8E4DD;
+            color: #3D3A36;
+            font-size: 17px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .toolbar {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 32px;
+            background: #D8D3CB;
+            border-bottom: 1px solid #C4BFB6;
+        }
+        .toolbar h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3D3A36;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toolbar h1 span { color: #8B4513; }
+        .toolbar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-add { background: #7A6B8F; color: #fff; }
+        .btn-add:hover { filter: brightness(1.08); }
+        .btn-add-row {
+            display: block;
+            width: 100%;
+            margin-top: 0;
+            border-radius: 0 0 12px 12px;
+            padding: 8px 14px;
+            font-size: 14px;
+        }
+        .btn-clear { background: #F4F1EB; color: #5A5550; border: 1px solid #C9C4BB; }
+        .hint-bar {
+            flex-shrink: 0;
+            padding: 10px 32px;
+            font-size: 15px;
+            color: #6E6962;
+            background: #E0DBD3;
+            border-bottom: 1px solid #C9C4BB;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .table-wrap {
+            flex: 1;
+            overflow: auto;
+            padding: 16px 16px 24px 32px;
+            min-height: 0;
+        }
+        .sheet-table-wrap {
+            border-radius: 12px;
+            overflow: hidden;
+            width: fit-content;
+            max-width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 2px 12px rgba(61, 58, 54, 0.12);
+        }
+        .summary-aside {
+            flex: 0 0 380px;
+            padding: 20px 28px 24px 12px;
+            min-height: 0;
+            display: flex;
+        }
+        .summary-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #F0EDE7;
+            border: 1px solid #C9C4BB;
+            border-radius: 12px;
+            overflow: hidden;
+            min-height: 0;
+            box-shadow: 0 2px 10px rgba(61, 58, 54, 0.08);
+        }
+        .summary-head {
+            padding: 18px 18px 14px;
+            border-bottom: 1px solid #C9C4BB;
+        }
+        .summary-head h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #5C4F72;
+        }
+        .summary-list-wrap {
+            flex: 1;
+            overflow: auto;
+            padding: 10px 14px;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .summary-block-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #5C4F72;
+            margin-bottom: 8px;
+            padding: 0 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .summary-table-wrap {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #D5D0C8;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 17px;
+        }
+        .summary-table th {
+            position: sticky;
+            top: 0;
+            background: #D8D3CB;
+            color: #5C4F72;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            padding: 11px 8px;
+            text-align: right;
+            border-bottom: 1px solid #C9C4BB;
+        }
+        .summary-table th.num { text-align: right; }
+        .summary-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #D5D0C8;
+            vertical-align: top;
+            color: #3D3A36;
+        }
+        .summary-table td.num {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .summary-table td.summary-none {
+            text-align: center;
+            color: #9A9590;
+            font-weight: 400;
+            font-style: italic;
+        }
+        .summary-table tbody tr:hover { background: rgba(122, 107, 143, 0.08); }
+        .summary-empty {
+            padding: 28px 14px;
+            text-align: center;
+            color: #6E6962;
+            font-size: 16px;
+        }
+        .summary-actions {
+            padding: 14px 16px 18px;
+            border-top: 1px solid #C9C4BB;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .btn-export {
+            background: #7A6B8F;
+            color: #fff;
+            width: 100%;
+        }
+        .btn-export:hover { filter: brightness(1.08); }
+        .btn-export:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+        .btn-export-csv {
+            background: #F4F1EB;
+            color: #5A5550;
+            border: 1px solid #C9C4BB;
+            width: 100%;
+        }
+        .btn-export-csv:hover:not(:disabled) { background: #EDE9E2; }
+        .btn-export-csv:disabled { opacity: 0.45; cursor: not-allowed; }
+        .sheet-table {
+            width: auto;
+            max-width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            background: #fff;
+            color: #222;
+            font-size: 14px;
+        }
+        .sheet-table th,
+        .sheet-table td {
+            border: 1px solid #bbb;
+            padding: 0;
+            vertical-align: middle;
+        }
+        .sheet-table thead th {
+            font-weight: 700;
+            text-align: center;
+            padding: 6px 4px;
+            white-space: nowrap;
+            color: #222;
+        }
+        .group-title {
+            font-size: 17px;
+            letter-spacing: 0.3px;
+            padding: 14px 6px;
+            line-height: 1.3;
+        }
+        .group-title.sec-antaro { background: #CEC4DE; color: #3D3550; }
+        .group-title.sec-formatki { background: #D9CDB5; color: #4A4030; }
+        .group-title.sec-wewnetrzne { background: #C4D0DC; color: #2E3A45; }
+        .sheet-table thead tr:first-child .col-del {
+            padding: 14px 0;
+        }
+        .sheet-table thead th.sec-antaro { background: #DDD6EA; }
+        .sheet-table thead th.sec-formatki { background: #E5D9C4; }
+        .sheet-table thead th.sec-wewnetrzne { background: #D4DEE8; }
+        .sheet-table tbody td.sec-antaro { background: #F7F5FA; }
+        .sheet-table tbody td.sec-formatki { background: #FAF7F0; }
+        .sheet-table tbody td.sec-wewnetrzne { background: #F4F7FA; }
+        .sheet-table tbody tr:nth-child(even) td.sec-antaro { background: #EFEAF7; }
+        .sheet-table tbody tr:nth-child(even) td.sec-formatki { background: #F3EDE3; }
+        .sheet-table tbody tr:nth-child(even) td.sec-wewnetrzne { background: #EAF0F5; }
+        .sheet-table tbody tr:hover td.sec-antaro { background: #E8E0F2; }
+        .sheet-table tbody tr:hover td.sec-formatki { background: #EBE3D4; }
+        .sheet-table tbody tr:hover td.sec-wewnetrzne { background: #DFE8EF; }
+        .sheet-table .col-header {
+            font-size: 13px;
+            line-height: 1.25;
+            padding: 5px 3px;
+        }
+        .sheet-table input,
+        .sheet-table select {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 4px 5px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #111;
+            min-height: 0;
+            line-height: 1.3;
+        }
+        .sheet-table input:focus,
+        .sheet-table select:focus {
+            outline: 2px solid #6c5ce7;
+            outline-offset: -2px;
+            background: #fffde7;
+        }
+        .sheet-table select { cursor: pointer; }
+        .cell-calc {
+            padding: 4px 5px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .cell-calc.out-tyl,
+        .cell-calc.out-dno {
+            color: #000;
+        }
+        .cell-calc.out-panel,
+        .cell-calc.out-reling {
+            color: #333;
+        }
+        .cell-calc.empty { color: #999; font-weight: 400; }
+        .cell-calc.muted { color: #555; font-weight: 600; }
+        .col-name { width: 110px; max-width: 110px; }
+        .col-szafek { width: 56px; }
+        .col-szuflad { width: 56px; }
+        .cabinet-cell-name, .cabinet-cell-szafek, .cabinet-cell-szuflad {
+            vertical-align: top;
+            padding: 0 !important;
+        }
+        .cabinet-cell-szuflad {
+            border-right: 2px solid #CEC4DE !important;
+        }
+        .cabinet-cell-name .inp-name {
+            width: 100%;
+            padding: 4px 5px;
+            font-weight: 600;
+            text-align: left;
+            min-width: 0;
+        }
+        .cabinet-cell-szafek select,
+        .cabinet-cell-szuflad select {
+            width: 100%;
+            text-align: center;
+            font-weight: 700;
+            color: #5C4F72;
+            padding: 4px 2px;
+        }
+        .col-del {
+            width: 34px;
+            text-align: center;
+            background: #eee !important;
+            padding: 0 !important;
+            vertical-align: top;
+        }
+        .cabinet-del-cell {
+            border-left: 1px solid #bbb;
+        }
+        .btn-del-group {
+            background: none;
+            border: none;
+            color: #6E6962;
+            cursor: pointer;
+            width: 100%;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 2px;
+        }
+        .btn-del-group:hover {
+            background: rgba(61, 58, 54, 0.08);
+            color: #3D3A36;
+        }
+        .btn-del-group svg { width: 15px; height: 15px; display: block; }
+        .col-num { width: 68px; }
+        .col-runner { width: 78px; }
+        .col-height { width: 68px; }
+        .col-yn { width: 62px; }
+        .col-out { width: 72px; }
+        .col-out-wide { width: 88px; }
+        .inp-name {
+            text-overflow: ellipsis;
+        }
+        td:first-child { overflow: hidden; }
+
+        @media (max-width: 1100px) {
+            .main-content { flex-direction: column; overflow: auto; }
+            body { overflow: auto; }
+            .table-wrap { padding: 16px 20px; overflow: visible; }
+            .summary-aside {
+                flex: none;
+                width: 100%;
+                padding: 0 20px 20px;
+            }
+            .summary-panel {
+                max-height: 420px;
+            }
+        }
+        @media (max-width: 768px) {
+            .toolbar { flex-direction: column; align-items: stretch; padding: 12px 16px; }
+            .hint-bar { padding: 8px 16px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="toolbar">
+    <h1><span>Blum Antaro</span> — dno i tyły szuflad</h1>
+    <div class="toolbar-actions">
+        <button type="button" class="btn btn-clear" id="clearRowsBtn">Wyczyść tabelę</button>
+    </div>
+</div>
+<p class="hint-bar">
+    LW = zew. szer. − 36 mm (boki 18 mm) · Tył = (LW−87) × H · Dno = (LW−75) × (NL−24) · Panel/Reling tylko przy „Tak”
+</p>
+
+<div class="main-content">
+<div class="table-wrap">
+    <div class="sheet-table-wrap">
+    <table class="sheet-table" id="antaroTable">
+        <thead>
+            <tr>
+                <th colspan="7" class="group-title sec-antaro">Blum Antaro</th>
+                <th colspan="2" class="group-title sec-formatki">Formatki szuflady</th>
+                <th colspan="3" class="group-title sec-wewnetrzne">Wewnętrzne</th>
+                <th class="col-del"></th>
+            </tr>
+            <tr>
+                <th class="col-header col-name sec-antaro">Nazwa</th>
+                <th class="col-header col-szafek sec-antaro">Ilość<br>szafek</th>
+                <th class="col-header col-szuflad sec-antaro">Ilość<br>szuflad</th>
+                <th class="col-header col-num sec-antaro">Zew szer<br>korpusu</th>
+                <th class="col-header col-num sec-antaro">Wew szer<br>korpusu</th>
+                <th class="col-header col-runner sec-antaro">Długość<br>prowadnicy</th>
+                <th class="col-header col-height sec-antaro">Wysokość<br>pleców</th>
+                <th class="col-header col-out-wide sec-formatki">Tył</th>
+                <th class="col-header col-out-wide sec-formatki">Dno</th>
+                <th class="col-header col-yn sec-wewnetrzne">Tak /<br>Nie</th>
+                <th class="col-header col-out sec-wewnetrzne">Panel</th>
+                <th class="col-header col-out sec-wewnetrzne">Reling</th>
+                <th class="col-del"></th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+    <button type="button" class="btn btn-add btn-add-row" id="addRowBtn">+ Dodaj szafkę</button>
+    </div>
+</div>
+
+<div class="summary-aside">
+<aside class="summary-panel">
+    <div class="summary-head">
+        <h2>Lista formatek</h2>
+    </div>
+    <div class="summary-list-wrap" id="summaryListWrap">
+        <p class="summary-empty" id="summaryEmpty">Brak formatek do wyświetlenia.</p>
+        <div id="summaryTablesWrap" hidden>
+            <div class="summary-block">
+                <h3 class="summary-block-title">Tyły</h3>
+                <div class="summary-table-wrap">
+                    <table class="summary-table">
+                        <thead>
+                            <tr>
+                                <th class="num">Szer</th>
+                                <th class="num">Wys</th>
+                                <th class="num">Szt</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryBodyTyl"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="summary-block">
+                <h3 class="summary-block-title">Dna</h3>
+                <div class="summary-table-wrap">
+                    <table class="summary-table">
+                        <thead>
+                            <tr>
+                                <th class="num">Szer</th>
+                                <th class="num">Wys</th>
+                                <th class="num">Szt</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryBodyDno"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="summary-actions">
+        <button type="button" class="btn btn-export-csv" id="exportCsvBtn" disabled>Eksport CSV</button>
+        <button type="button" class="btn btn-export" id="exportNestingBtn" disabled>Eksportuj do Nesting →</button>
+    </div>
+</aside>
+</div>
+</div>
+
+<script>
+const NESTING_STORAGE_KEY = 'stolarnia_nesting_parts';
+const BOARD_OFFSET = 36;
+const OFFSETS = { backWidth: 87, bottomWidth: 75, bottomDepth: 24, panel: 132, rail: 122 };
+
+const RUNNER_OPTIONS = [270, 300, 350, 400, 450, 500, 550, 600, 650];
+const HEIGHT_OPTIONS = [
+    { v: 69, l: '69' },
+    { v: 84, l: '84' },
+    { v: 116, l: '116' },
+    { v: 167, l: '167' },
+    { v: 199, l: '199' }
+];
+
+const DEFAULT_DRAWER = { ext: 600, runner: 500, height: 84, internal: 'Nie' };
+const HEIGHT_NO_RAIL = 84;
+
+const DEFAULT_CABINETS = [
+    {
+        name: '',
+        szafek: 1,
+        szuflad: 1,
+        drawers: [{ ...DEFAULT_DRAWER }]
+    }
+];
+
+function szafekSelect(selected) {
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v =>
+        `<option value="${v}"${v === selected ? ' selected' : ''}>${v}</option>`
+    ).join('');
+}
+
+function szufladSelect(selected) {
+    return [1, 2, 3, 4, 5, 6].map(v =>
+        `<option value="${v}"${v === selected ? ' selected' : ''}>${v}</option>`
+    ).join('');
+}
+
+function defaultDrawer() {
+    return { ...DEFAULT_DRAWER };
+}
+
+function escapeAttr(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function getGroupRows(groupId) {
+    return Array.from(document.querySelectorAll(`#tableBody tr[data-group-id="${groupId}"]`));
+}
+
+function getGroupFirstRow(groupId) {
+    return document.querySelector(`#tableBody tr[data-group-id="${groupId}"][data-group-first="1"]`);
+}
+
+function getCabinetName(groupId) {
+    const first = getGroupFirstRow(groupId);
+    if (!first) return '';
+    const raw = first.querySelector('.inp-name')?.value.trim() || '';
+    return raw || 'Szafka';
+}
+
+function drawerRowHtml(data) {
+    const d = { ...defaultDrawer(), ...data };
+    return `
+        <td class="sec-antaro"><input type="number" class="inp-ext" value="${d.ext}" min="100" step="1"></td>
+        <td class="sec-antaro cell-calc muted out-int">—</td>
+        <td class="sec-antaro"><select class="inp-runner">${runnerSelect(d.runner)}</select></td>
+        <td class="sec-antaro"><select class="inp-height">${heightSelect(d.height)}</select></td>
+        <td class="sec-formatki cell-calc out-tyl">—</td>
+        <td class="sec-formatki cell-calc out-dno">—</td>
+        <td class="sec-wewnetrzne"><select class="inp-internal">
+            <option value="Nie"${d.internal === 'Nie' ? ' selected' : ''}>Nie</option>
+            <option value="Tak"${d.internal === 'Tak' ? ' selected' : ''}>Tak</option>
+        </select></td>
+        <td class="sec-wewnetrzne cell-calc out-panel empty">—</td>
+        <td class="sec-wewnetrzne cell-calc out-reling empty">—</td>
+    `;
+}
+
+function bindDrawerRow(tr) {
+    tr.querySelectorAll('.inp-ext, .inp-runner, .inp-height, .inp-internal').forEach(el => {
+        el.addEventListener('input', () => updateRow(tr));
+        el.addEventListener('change', () => updateRow(tr));
+    });
+}
+
+function createDrawerRow(groupId, isFirst, data, rowspan) {
+    const tr = document.createElement('tr');
+    tr.dataset.groupId = groupId;
+    if (isFirst) tr.dataset.groupFirst = '1';
+
+    const d = { ...defaultDrawer(), ...data };
+    let html = '';
+
+    if (isFirst) {
+        const name = data.name ?? '';
+        const szafek = data.szafek ?? 1;
+        const szuflad = data.szuflad ?? 1;
+        html += `
+        <td class="sec-antaro cabinet-cell-name" rowspan="${rowspan}">
+            <input type="text" class="inp-name" value="${escapeAttr(name)}" placeholder="SZAFKA 001" maxlength="28">
+        </td>
+        <td class="sec-antaro cabinet-cell-szafek" rowspan="${rowspan}">
+            <select class="inp-szafek" title="Ilość szafek">${szafekSelect(szafek)}</select>
+        </td>
+        <td class="sec-antaro cabinet-cell-szuflad" rowspan="${rowspan}">
+            <select class="inp-szuflad" title="Ilość szuflad">${szufladSelect(szuflad)}</select>
+        </td>`;
+    }
+
+    html += drawerRowHtml(d);
+
+    if (isFirst) {
+        html += `
+        <td class="col-del cabinet-del-cell" rowspan="${rowspan}">
+            <button type="button" class="btn-del-group" title="Usuń szafkę" aria-label="Usuń szafkę">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </button>
+        </td>`;
+    }
+
+    tr.innerHTML = html;
+    bindDrawerRow(tr);
+
+    if (isFirst) {
+        const first = tr;
+        first.querySelector('.inp-name').addEventListener('input', () => updateSummary());
+        first.querySelector('.inp-szafek').addEventListener('change', () => updateSummary());
+        first.querySelector('.inp-szuflad').addEventListener('change', (e) => {
+            setGroupQty(groupId, parseInt(e.target.value, 10));
+        });
+        first.querySelector('.btn-del-group').addEventListener('click', () => removeCabinetGroup(groupId));
+    }
+
+    updateRow(tr);
+    return tr;
+}
+
+function getDrawerDataFromRow(tr) {
+    return {
+        ext: parseFloat(tr.querySelector('.inp-ext')?.value) || 600,
+        runner: parseFloat(tr.querySelector('.inp-runner')?.value) || 500,
+        height: parseFloat(tr.querySelector('.inp-height')?.value) || 84,
+        internal: tr.querySelector('.inp-internal')?.value || 'Nie'
+    };
+}
+
+function setGroupQty(groupId, newQty) {
+    newQty = Math.max(1, Math.min(6, parseInt(newQty, 10) || 1));
+    let rows = getGroupRows(groupId);
+    const first = rows[0];
+    if (!first) return;
+
+    const nameCell = first.querySelector('.cabinet-cell-name');
+    const szafekCell = first.querySelector('.cabinet-cell-szafek');
+    const szufladCell = first.querySelector('.cabinet-cell-szuflad');
+    const delCell = first.querySelector('.cabinet-del-cell');
+    const qtySel = first.querySelector('.inp-szuflad');
+    const current = rows.length;
+
+    if (newQty > current) {
+        for (let i = current; i < newQty; i++) {
+            const rowsNow = getGroupRows(groupId);
+            const last = rowsNow[rowsNow.length - 1];
+            const template = getDrawerDataFromRow(last);
+            const tr = createDrawerRow(groupId, false, template);
+            last.after(tr);
+        }
+    } else if (newQty < current) {
+        rows = getGroupRows(groupId);
+        for (let i = rows.length - 1; i >= newQty; i--) {
+            rows[i].remove();
+        }
+    }
+
+    if (nameCell) nameCell.rowSpan = newQty;
+    if (szafekCell) szafekCell.rowSpan = newQty;
+    if (szufladCell) szufladCell.rowSpan = newQty;
+    if (delCell) delCell.rowSpan = newQty;
+    if (qtySel) qtySel.value = String(newQty);
+
+    getGroupRows(groupId).forEach(updateRow);
+    updateSummary();
+}
+
+function removeCabinetGroup(groupId) {
+    getGroupRows(groupId).forEach(tr => tr.remove());
+    if (!document.querySelector('#tableBody tr')) addCabinetGroup();
+    else updateSummary();
+}
+
+function addCabinetGroup(data = {}) {
+    const groupId = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const szuflad = Math.max(1, Math.min(6, parseInt(data.szuflad, 10) || 1));
+    const szafek = Math.max(1, Math.min(10, parseInt(data.szafek, 10) || 1));
+    const drawers = Array.isArray(data.drawers) && data.drawers.length
+        ? data.drawers
+        : Array.from({ length: szuflad }, () => defaultDrawer());
+
+    const tbody = document.getElementById('tableBody');
+    const fragment = document.createDocumentFragment();
+
+    for (let i = 0; i < szuflad; i++) {
+        const rowData = i === 0
+            ? { name: data.name ?? '', szafek, szuflad, ...drawers[i] }
+            : drawers[i] || defaultDrawer();
+        fragment.appendChild(createDrawerRow(groupId, i === 0, rowData, szuflad));
+    }
+
+    tbody.appendChild(fragment);
+    updateSummary();
+}
+
+function runnerSelect(selected) {
+    return RUNNER_OPTIONS.map(v =>
+        `<option value="${v}"${v === selected ? ' selected' : ''}>${v}</option>`
+    ).join('');
+}
+
+function heightSelect(selected) {
+    return HEIGHT_OPTIONS.map(o =>
+        `<option value="${o.v}"${o.v === selected ? ' selected' : ''}>${o.l}</option>`
+    ).join('');
+}
+
+function calcRow(ext, runner, height, internal) {
+    const intW = ext - BOARD_OFFSET;
+    if (intW <= 0) return null;
+
+    const backW = intW - OFFSETS.backWidth;
+    const bottomW = intW - OFFSETS.bottomWidth;
+    const bottomD = runner - OFFSETS.bottomDepth;
+
+    const tyl = backW > 0 && height > 0 ? `${backW} x ${height}` : '—';
+    const dno = bottomW > 0 && bottomD > 0 ? `${bottomW} x ${bottomD}` : '—';
+
+    const isInternal = internal === 'Tak';
+    const panelW = isInternal && intW - OFFSETS.panel > 0 ? intW - OFFSETS.panel : 0;
+    const needsRail = isInternal && height !== HEIGHT_NO_RAIL;
+    const railW = needsRail && intW - OFFSETS.rail > 0 ? intW - OFFSETS.rail : 0;
+
+    return {
+        intW,
+        tyl: backW > 0 && height > 0 ? `${backW} x ${height}` : '—',
+        dno: bottomW > 0 && bottomD > 0 ? `${bottomW} x ${bottomD}` : '—',
+        panel: panelW ? String(panelW) : '',
+        reling: railW ? String(railW) : '',
+        isInternal,
+        backW, backH: height, bottomW, bottomD, panelW, railW
+    };
+}
+
+function getRowParts(tr) {
+    const groupId = tr.dataset.groupId;
+    const groupRows = getGroupRows(groupId);
+    const drawerIdx = groupRows.indexOf(tr) + 1;
+    const cabinetName = getCabinetName(groupId);
+    const baseName = groupRows.length > 1
+        ? `${cabinetName} — szufl. ${drawerIdx}`
+        : cabinetName;
+
+    const ext = parseFloat(tr.querySelector('.inp-ext').value) || 0;
+    const runner = parseFloat(tr.querySelector('.inp-runner').value) || 0;
+    const height = parseFloat(tr.querySelector('.inp-height').value) || 0;
+    const internal = tr.querySelector('.inp-internal').value;
+    const r = calcRow(ext, runner, height, internal);
+    if (!r) return [];
+
+    const firstRow = groupRows[0];
+    const cabinetQty = parseInt(firstRow?.querySelector('.inp-szafek')?.value) || 1;
+
+    const items = [];
+    if (r.backW > 0 && r.backH > 0) {
+        items.push({ type: 'Tył', name: `${baseName} — tył`, w: r.backW, h: r.backH, cabinetQty });
+    }
+    if (r.bottomW > 0 && r.bottomD > 0) {
+        items.push({ type: 'Dno', name: `${baseName} — dno`, w: r.bottomW, h: r.bottomD, cabinetQty });
+    }
+    return items;
+}
+
+function aggregateParts(allItems) {
+    const map = new Map();
+    for (const item of allItems) {
+        const key = `${item.type}|${item.w}|${item.h}`;
+        if (map.has(key)) {
+            map.get(key).qty += item.cabinetQty || 1;
+        } else {
+            map.set(key, {
+                type: item.type,
+                name: `${item.type} ${item.w}×${item.h}`,
+                w: item.w,
+                h: item.h,
+                qty: item.cabinetQty || 1
+            });
+        }
+    }
+    return Array.from(map.values()).sort((a, b) => {
+        const typeOrder = { Tył: 0, Dno: 1 };
+        const ta = typeOrder[a.type] ?? 9;
+        const tb = typeOrder[b.type] ?? 9;
+        if (ta !== tb) return ta - tb;
+        if (a.w !== b.w) return b.w - a.w;
+        return b.h - a.h;
+    });
+}
+
+let lastSummaryParts = [];
+
+function sortBySize(a, b) {
+    if (a.w !== b.w) return b.w - a.w;
+    return b.h - a.h;
+}
+
+function renderSummaryRows(parts) {
+    if (!parts.length) {
+        return '<tr><td colspan="3" class="summary-none">—</td></tr>';
+    }
+    return parts.map(p => `
+        <tr>
+            <td class="num">${p.w}</td>
+            <td class="num">${p.h}</td>
+            <td class="num">${p.qty}</td>
+        </tr>
+    `).join('');
+}
+
+function updateSummary() {
+    const rows = Array.from(document.querySelectorAll('#tableBody tr[data-group-id]'));
+    const allItems = rows.flatMap(tr => getRowParts(tr));
+    lastSummaryParts = aggregateParts(allItems);
+
+    const tyly = lastSummaryParts.filter(p => p.type === 'Tył').sort(sortBySize);
+    const dna = lastSummaryParts.filter(p => p.type === 'Dno').sort(sortBySize);
+
+    const emptyEl = document.getElementById('summaryEmpty');
+    const tablesWrap = document.getElementById('summaryTablesWrap');
+    const exportBtn = document.getElementById('exportNestingBtn');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+
+    if (!lastSummaryParts.length) {
+        emptyEl.hidden = false;
+        tablesWrap.hidden = true;
+        exportBtn.disabled = true;
+        exportCsvBtn.disabled = true;
+        return;
+    }
+
+    emptyEl.hidden = true;
+    tablesWrap.hidden = false;
+    exportBtn.disabled = false;
+    exportCsvBtn.disabled = false;
+
+    document.getElementById('summaryBodyTyl').innerHTML = renderSummaryRows(tyly);
+    document.getElementById('summaryBodyDno').innerHTML = renderSummaryRows(dna);
+}
+
+function csvCell(value) {
+    const s = String(value);
+    if (/[;"\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+    return s;
+}
+
+function exportCsv() {
+    if (!lastSummaryParts.length) return;
+    const lines = ['Typ;Szer mm;Wys mm;Szt'];
+    const ordered = [
+        ...lastSummaryParts.filter(p => p.type === 'Tył').sort(sortBySize),
+        ...lastSummaryParts.filter(p => p.type === 'Dno').sort(sortBySize)
+    ];
+    ordered.forEach(p => {
+        lines.push([p.type, p.w, p.h, p.qty].map(csvCell).join(';'));
+    });
+    const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const date = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `antaro_formateki_${date}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function toNestingPayload() {
+    return lastSummaryParts.map((p, i) => ({
+        id: String(i + 1),
+        name: p.name,
+        w: p.w,
+        h: p.h,
+        qty: p.qty,
+        rot: p.type === 'Tył' ? 'none' : 'any'
+    }));
+}
+
+function exportToNesting() {
+    if (!lastSummaryParts.length) return;
+    const payload = toNestingPayload();
+    try {
+        localStorage.setItem(NESTING_STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+        alert('Nie udało się zapisać listy: ' + e.message);
+        return;
+    }
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'STOLARNIA_IMPORT_NESTING', parts: payload }, '*');
+    } else {
+        alert('Lista zapisana. Przejdź do zakładki Nesting.');
+        window.location.href = 'index.html#kalkulator/nesting';
+    }
+}
+
+function updateRow(tr) {
+    const ext = parseFloat(tr.querySelector('.inp-ext').value) || 0;
+    const runner = parseFloat(tr.querySelector('.inp-runner').value) || 0;
+    const height = parseFloat(tr.querySelector('.inp-height').value) || 0;
+    const internal = tr.querySelector('.inp-internal').value;
+
+    const r = calcRow(ext, runner, height, internal);
+
+    const elInt = tr.querySelector('.out-int');
+    const elTyl = tr.querySelector('.out-tyl');
+    const elDno = tr.querySelector('.out-dno');
+    const elPanel = tr.querySelector('.out-panel');
+    const elReling = tr.querySelector('.out-reling');
+
+    if (!r) {
+        elInt.textContent = '—';
+        elInt.classList.add('empty');
+        elTyl.textContent = '—';
+        elDno.textContent = '—';
+        elPanel.textContent = '';
+        elReling.textContent = '';
+        elPanel.classList.add('empty');
+        elReling.classList.add('empty');
+        updateSummary();
+        return;
+    }
+
+    elInt.textContent = r.intW;
+    elInt.classList.remove('empty');
+
+    elTyl.textContent = r.tyl;
+    elTyl.classList.toggle('empty', r.tyl === '—');
+
+    elDno.textContent = r.dno;
+    elDno.classList.toggle('empty', r.dno === '—');
+
+    elPanel.textContent = r.panel || '—';
+    elPanel.classList.toggle('empty', !r.panel);
+    elReling.textContent = r.reling || '—';
+    elReling.classList.toggle('empty', !r.reling);
+
+    updateSummary();
+}
+
+document.getElementById('addRowBtn').addEventListener('click', () => addCabinetGroup());
+document.getElementById('clearRowsBtn').addEventListener('click', () => {
+    document.getElementById('tableBody').innerHTML = '';
+    addCabinetGroup();
+    updateSummary();
+});
+
+document.getElementById('exportNestingBtn').addEventListener('click', exportToNesting);
+document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+
+DEFAULT_CABINETS.forEach(cab => addCabinetGroup(cab));
+updateSummary();
+</script>
+</body>
+</html>

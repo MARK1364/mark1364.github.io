@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartBox Nesting (Math Engine)</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>SmartBox Nesting Engine</h2>
+                <p>Mathematical 2D Bin Packing</p>
+            </div>
+
+            <div class="panel">
+                <h3>Parametry Arkusza</h3>
+                <div class="row">
+                    <div class="input-group">
+                        <label for="boardW">Szer. (mm)</label>
+                        <input type="number" id="boardW" value="2800">
+                    </div>
+                    <div class="input-group">
+                        <label for="boardH">Wys. (mm)</label>
+                        <input type="number" id="boardH" value="2070">
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="input-group">
+                        <label for="kerf">Rzaz piły (mm)</label>
+                        <input type="number" id="kerf" value="4">
+                    </div>
+                    <div class="input-group">
+                        <label for="optimizeMode">Tryb Rozkroju</label>
+                        <select id="optimizeMode" style="background-color: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); padding: 8px 10px; border-radius: 4px; font-family: inherit; font-size: 0.9rem;">
+                            <option value="fast">Szybki (0.1s)</option>
+                            <option value="pro">Profesjonalny (Deep Search)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel list-panel">
+                <div class="panel-header">
+                    <h3>Lista Formatek</h3>
+                    <button id="addPartBtn" class="btn-icon" title="Dodaj formatkę">+</button>
+                </div>
+                <div class="table-container">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Nazwa formatki</th>
+                                <th width="65">Szer.</th>
+                                <th width="65">Wys.</th>
+                                <th width="45">Szt.</th>
+                                <th width="65" title="Kierunek usłojenia / zgoda na obrót">Obrót</th>
+                                <th width="35"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="partsList"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="runNestingBtn" class="btn-primary">
+                    <span id="btnText">Generuj Rozkrój</span>
+                </button>
+            </div>
+
+            <div id="statusMsg" class="status-msg"></div>
+        </aside>
+
+        <main class="workspace">
+            <div class="toolbar">
+                <div class="stats">
+                    <span>Liczba płyt: <strong id="boardsCountLabel">0</strong></span>
+                    <span>Odrzut (średnio): <strong id="wasteLabel">0%</strong></span>
+                </div>
+                <button class="btn-secondary" id="exportPdfBtn" disabled>Pobierz SVG</button>
+            </div>
+
+            <div class="boards-container" id="boardsContainer"></div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
