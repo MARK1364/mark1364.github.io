@@ -421,12 +421,109 @@ body {
 @media (max-width: 900px) {
     .app-container {
         flex-direction: column;
+        overflow: hidden;
     }
 
     .sidebar {
         width: 100%;
-        max-height: 45%;
+        max-height: 50%;
         border-right: none;
         border-bottom: 1px solid var(--border);
+        overflow-y: auto;
+        padding: 12px;
+    }
+
+    .workspace {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+    }
+
+    .panel {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .panel h3 {
+        font-size: 0.8rem;
+        margin-bottom: 6px;
+    }
+
+    .input-group {
+        margin-bottom: 6px;
+    }
+
+    .input-group input,
+    .input-group select {
+        padding: 6px 8px;
+        font-size: 0.8rem;
+    }
+
+    .table-container {
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    .excel-table th, .excel-table td {
+        padding: 4px 2px;
+        font-size: 0.7rem;
+    }
+
+    .excel-table input {
+        font-size: 0.7rem;
+        padding: 2px 2px;
+    }
+
+    .actions {
+        padding-top: 6px;
+    }
+
+    .btn-primary {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    .stats {
+        font-size: 0.75rem;
+        gap: 8px;
+    }
+
+    .toolbar {
+        padding: 6px 10px;
+    }
+
+    .boards-container {
+        padding: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        max-height: 55%;
+        padding: 8px;
+    }
+
+    table th, table td {
+        font-size: 0.65rem;
+    }
+
+    .excel-table th, .excel-table td {
+        padding: 2px 1px;
+    }
+
+    .excel-table input {
+        width: 100%;
+        min-width: 0;
+        padding: 2px 1px;
+    }
+
+    .row {
+        gap: 6px;
+    }
+
+    .input-group input,
+    .input-group select {
+        padding: 4px 6px;
+        font-size: 0.75rem;
     }
 }
