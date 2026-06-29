@@ -87,7 +87,9 @@ body {
     color: var(--text-muted);
 }
 
-.input-group input {
+.input-group input,
+.input-group select {
+    width: 100%;
     background-color: var(--bg-main);
     border: 1px solid var(--border);
     color: var(--text-main);
