@@ -1,12 +1,5 @@
-// State
-let parts = [
-    { id: '1', name: 'Bok Lewy', w: 2000, h: 600, qty: 1, rot: 'any' },
-    { id: '2', name: 'Bok Prawy', w: 2000, h: 600, qty: 1, rot: 'any' },
-    { id: '3', name: 'Wieniec Dolny', w: 800, h: 600, qty: 1, rot: 'any' },
-    { id: '4', name: 'Wieniec Górny', w: 800, h: 600, qty: 1, rot: 'any' },
-    { id: '5', name: 'Półka Wew', w: 764, h: 580, qty: 5, rot: 'any' },
-    { id: '6', name: 'Szuflada Tył', w: 600, h: 150, qty: 6, rot: 'none' }
-];
+// State — starts empty, populated via import from szuflad tools
+let parts = [];
 
 const NESTING_STORAGE_KEY = 'stolarnia_nesting_parts';
 
