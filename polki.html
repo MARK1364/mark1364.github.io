@@ -602,12 +602,27 @@ function draw() {
         }
         const dimTextL = document.createElementNS("http://www.w3.org/2000/svg", "text");
         dimTextL.setAttribute("x", leftLineX - 10);
-        dimTextL.setAttribute("y", suppY_SVG + 4);
+        dimTextL.setAttribute("y", suppY_SVG);
         dimTextL.setAttribute("fill", openingDimColor);
         dimTextL.setAttribute("font-size", fontSize - 2);
         dimTextL.setAttribute("text-anchor", "end");
-        dimTextL.setAttribute("alignment-baseline", "middle");
-        dimTextL.textContent = labelText;
+        dimTextL.setAttribute("dominant-baseline", "middle");
+        if (k === 0) {
+            dimTextL.textContent = labelText;
+        } else {
+            var parts = labelText.split(': ');
+            var t1 = document.createElementNS(SVG_NS, 'tspan');
+            t1.setAttribute('x', leftLineX - 10); t1.setAttribute('dy', '-7');
+            t1.setAttribute('font-size', fontSize - 6);
+            t1.setAttribute('font-weight', '700');
+            t1.textContent = parts[0];
+            dimTextL.appendChild(t1);
+            var t2 = document.createElementNS(SVG_NS, 'tspan');
+            t2.setAttribute('x', leftLineX - 10); t2.setAttribute('dy', (fontSize - 2));
+            t2.setAttribute('font-size', fontSize - 4);
+            t2.textContent = parts[1];
+            dimTextL.appendChild(t2);
+        }
         svg.appendChild(dimTextL);
     }
 
@@ -656,12 +671,27 @@ function draw() {
         }
         const dimTextR = document.createElementNS("http://www.w3.org/2000/svg", "text");
         dimTextR.setAttribute("x", rightLineX + 10);
-        dimTextR.setAttribute("y", shelfY_SVG + 4);
+        dimTextR.setAttribute("y", shelfY_SVG);
         dimTextR.setAttribute("fill", dimTextColor);
         dimTextR.setAttribute("font-size", fontSize - 2);
         dimTextR.setAttribute("text-anchor", "start");
-        dimTextR.setAttribute("alignment-baseline", "middle");
-        dimTextR.textContent = labelText;
+        dimTextR.setAttribute("dominant-baseline", "middle");
+        if (k === 0) {
+            dimTextR.textContent = labelText;
+        } else {
+            var parts = labelText.split(': ');
+            var t1 = document.createElementNS(SVG_NS, 'tspan');
+            t1.setAttribute('x', rightLineX + 10); t1.setAttribute('dy', '-7');
+            t1.setAttribute('font-size', fontSize - 6);
+            t1.setAttribute('font-weight', '700');
+            t1.textContent = parts[0];
+            dimTextR.appendChild(t1);
+            var t2 = document.createElementNS(SVG_NS, 'tspan');
+            t2.setAttribute('x', rightLineX + 10); t2.setAttribute('dy', (fontSize - 2));
+            t2.setAttribute('font-size', fontSize - 4);
+            t2.textContent = parts[1];
+            dimTextR.appendChild(t2);
+        }
         svg.appendChild(dimTextR);
     }
 
