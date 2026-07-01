@@ -573,12 +573,12 @@ function calc() {
 
     // Green editable circle for R
     var rCx = pointW_x - (R * b_scale) / 2, rCy = pointW_y + 22;
-    svgBent.appendChild(makeDimBadge(rCx, rCy, 'R', R, 'lenR', 10, 500));
+    svgBent.appendChild(makeDimBadge(rCx, rCy, 'R', R, 'lenR', 1, 500));
 
     // Green editable circle for T on rect1
     var tCx = b_startX + (leftFlatMM * b_scale) / 2;
     var tCy = b_startY + (T * b_scale) / 2;
-    svgBent.appendChild(makeDimBadge(tCx, tCy, 'T', T, 'T', 3, 50));
+    svgBent.appendChild(makeDimBadge(tCx, tCy, 'T', T, 'T', 1, 50));
 
     // White result badge helper
     function addWhiteBadge(cx, cy, val) {
