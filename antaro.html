@@ -746,7 +746,28 @@ function removeCabinetGroup(groupId) {
     else updateSummary();
 }
 
+function nextCabinetName() {
+    const used = new Set();
+    let max = 0;
+    document.querySelectorAll('#tableBody .inp-name').forEach(inp => {
+        const v = String(inp.value || '').trim();
+        if (v) used.add(v);
+        const m = v.match(/(\d+)\s*$/);
+        if (m) max = Math.max(max, parseInt(m[1], 10));
+    });
+    let n = max + 1;
+    let name = 'SZAFKA ' + String(n).padStart(3, '0');
+    while (used.has(name)) {
+        n++;
+        name = 'SZAFKA ' + String(n).padStart(3, '0');
+    }
+    return name;
+}
+
 function addCabinetGroup(data = {}) {
+    if (data.name == null || String(data.name).trim() === '') {
+        data = { ...data, name: nextCabinetName() };
+    }
     const groupId = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     const szuflad = Math.max(1, Math.min(6, parseInt(data.szuflad, 10) || 1));
     const szafek = Math.max(1, Math.min(10, parseInt(data.szafek, 10) || 1));
