@@ -1,4 +1,4 @@
-const CACHE = 'stolarnia-pro-v6';
+const CACHE = 'stolarnia-pro-v7';
 const ASSETS = [
   'index.html',
   'rogowa.html',
