@@ -1,4 +1,4 @@
-const CACHE = 'stolarnia-pro-v2';
+const CACHE = 'stolarnia-pro-v3';
 const ASSETS = [
   'index.html',
   'rogowa.html',
@@ -7,6 +7,8 @@ const ASSETS = [
   'giecie.html',
   'antaro.html',
   'sevroll.html',
+  'nesting/index.html',
+  'nesting/styles.css',
   'manifest.json'
 ];
 

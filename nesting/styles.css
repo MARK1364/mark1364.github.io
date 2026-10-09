@@ -419,35 +419,64 @@ body {
 }
 
 @media (max-width: 900px) {
+    html { height: auto; }
+
+    body {
+        display: block;
+        height: auto;
+        min-height: 100dvh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+        touch-action: manipulation;
+    }
+
     .app-container {
-        flex-direction: column;
-        overflow: hidden;
+        display: block;
+        height: auto;
+        overflow: visible;
     }
 
     .sidebar {
         width: 100%;
-        max-height: 60%;
+        max-height: none;
         border-right: none;
         border-bottom: 1px solid var(--border);
-        overflow-y: auto;
+        overflow: visible;
         padding: 12px;
+        box-shadow: none;
     }
 
     .list-panel {
-        flex: 1;
-        min-height: 60px;
-        overflow-y: auto;
+        overflow: visible;
     }
 
     .table-container {
+        overflow-x: auto;
+        overflow-y: visible;
         max-height: none;
-        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .excel-table {
+        min-width: 560px;
+    }
+
+    .excel-table th {
+        font-size: 0.75rem;
+        padding: 8px 6px;
+    }
+
+    .excel-table input,
+    .excel-table select {
+        font-size: 16px;
+        min-height: 44px;
+        padding: 8px 6px;
     }
 
     .workspace {
-        flex: 1;
-        min-height: 0;
-        overflow: auto;
+        display: block;
+        overflow: visible;
     }
 
     .panel {
@@ -466,22 +495,9 @@ body {
 
     .input-group input,
     .input-group select {
-        padding: 6px 8px;
-        font-size: 0.8rem;
-    }
-
-    .table-container {
-        overflow-y: auto;
-    }
-
-    .excel-table th, .excel-table td {
-        padding: 4px 2px;
-        font-size: 0.7rem;
-    }
-
-    .excel-table input {
-        font-size: 0.7rem;
-        padding: 2px 2px;
+        font-size: 16px;
+        min-height: 44px;
+        padding: 8px 10px;
     }
 
     .actions {
@@ -489,51 +505,53 @@ body {
     }
 
     .btn-primary {
-        padding: 8px 12px;
-        font-size: 0.8rem;
+        min-height: 52px;
+        padding: 12px;
+        font-size: 1rem;
+    }
+
+    .btn-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.4rem;
+        flex-shrink: 0;
     }
 
     .stats {
-        font-size: 0.75rem;
-        gap: 8px;
+        font-size: 0.85rem;
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
     .toolbar {
-        padding: 6px 10px;
+        height: auto;
+        padding: 10px 12px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .toolbar .btn-secondary {
+        min-height: 44px;
+        font-size: 16px;
     }
 
     .boards-container {
-        padding: 6px;
+        overflow: visible;
+        padding: 12px;
+        gap: 24px;
+    }
+
+    .board-wrapper {
+        max-width: 100%;
     }
 }
 
 @media (max-width: 480px) {
     .sidebar {
-        max-height: 70%;
         padding: 8px;
-    }
-
-    table th, table td {
-        font-size: 0.65rem;
-    }
-
-    .excel-table th, .excel-table td {
-        padding: 2px 1px;
-    }
-
-    .excel-table input {
-        width: 100%;
-        min-width: 0;
-        padding: 2px 1px;
     }
 
     .row {
         gap: 6px;
-    }
-
-    .input-group input,
-    .input-group select {
-        padding: 4px 6px;
-        font-size: 0.75rem;
     }
 }
