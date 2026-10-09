@@ -1,10 +1,12 @@
-const CACHE = 'stolarnia-pro-v1';
+const CACHE = 'stolarnia-pro-v2';
 const ASSETS = [
   'index.html',
   'rogowa.html',
   'polki.html',
   'lamele.html',
   'giecie.html',
+  'antaro.html',
+  'sevroll.html',
   'manifest.json'
 ];
 
