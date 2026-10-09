@@ -207,6 +207,7 @@
         <button class="sub-tab" data-calc="nesting">Nesting</button>
         <button class="sub-tab" data-calc="antaro">Antaro</button>
         <button class="sub-tab" data-calc="sevroll">Sevroll</button>
+        <button class="sub-tab" data-calc="merivo">Merivo</button>
         <button class="sub-tab" data-calc="rogowa">Rogowa</button>
     </div>
 </header>
@@ -220,6 +221,7 @@
             <iframe id="frame-nesting" src="nesting/index.html" title="Nesting — Rozkrój"></iframe>
             <iframe id="frame-antaro" src="antaro.html" title="Blum Antaro — dno i tył"></iframe>
             <iframe id="frame-sevroll" src="sevroll.html" title="Sevroll Box 3D — dno i tył"></iframe>
+            <iframe id="frame-merivo" src="merivo.html" title="Blum Merivobox — dno i tył"></iframe>
             <iframe id="frame-rogowa" src="rogowa.html" title="Szafka rogowa"></iframe>
         </div>
     </section>
@@ -276,7 +278,7 @@
         const [main, sub] = hash.split('/');
         const valid = ['kalkulator', 'render', 'harmonogram'];
         switchMain(valid.includes(main) ? main : 'kalkulator');
-        if (main === 'kalkulator' && ['giecie', 'lamele', 'polki', 'nesting', 'antaro', 'sevroll', 'rogowa'].includes(sub)) {
+        if (main === 'kalkulator' && ['giecie', 'lamele', 'polki', 'nesting', 'antaro', 'sevroll', 'merivo', 'rogowa'].includes(sub)) {
             switchCalc(sub);
         }
     }
