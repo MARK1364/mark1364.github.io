@@ -361,9 +361,13 @@
             display: none;
         }
         @media (max-width: 768px) {
-            html, body { height: 100dvh; }
+            html { height: auto; }
             body {
-                overflow: auto;
+                display: block;
+                height: auto;
+                min-height: 100dvh;
+                overflow-y: auto;
+                overflow-x: hidden;
                 -webkit-text-size-adjust: 100%;
                 font-size: 16px;
                 touch-action: manipulation;
@@ -389,10 +393,11 @@
                 padding: 10px 12px;
             }
             .main-content {
-                flex-direction: column;
+                display: block;
                 overflow: visible;
             }
             .table-wrap {
+                display: block;
                 padding: 0 0 12px;
                 overflow: visible;
             }
@@ -448,10 +453,18 @@
                 left: 0;
             }
             .summary-aside {
+                display: block;
+                width: 100%;
                 padding: 0 12px calc(20px + env(safe-area-inset-bottom, 0px));
             }
             .summary-panel {
+                display: block;
                 max-height: none;
+                overflow: visible;
+            }
+            .summary-list-wrap {
+                display: block;
+                overflow: visible;
             }
             .summary-actions .btn {
                 min-height: 48px;
